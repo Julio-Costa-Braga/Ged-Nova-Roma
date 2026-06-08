@@ -1,0 +1,195 @@
+<!-- SIDEBAR LATERAL - GED Faculdade Nova Roma -->
+<aside id="sidebar" class="fixed left-0 top-0 w-64 h-screen bg-blue-900 text-white overflow-y-auto transition-all duration-300 z-50 shadow-lg">
+    
+    <!-- HEADER DA SIDEBAR -->
+    <div class="bg-blue-950 p-6 sticky top-0 border-b border-blue-800">
+        <div class="flex items-center space-x-3 mb-4">
+            <img src="images.png" alt="Nova Roma Logo" class="w-10 h-10 rounded-lg">
+            <div>
+                <h1 class="font-bold text-base tracking-wide">NOVA ROMA</h1>
+                <p class="text-xs text-blue-300">Sistema GED</p>
+            </div>
+        </div>
+        <div id="userInfo" class="bg-blue-800 rounded-lg p-3 text-xs flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full overflow-hidden bg-slate-50 flex items-center justify-center" id="sidebarUserPhotoWrapper">
+                <img id="sidebarUserPhoto" src="" alt="Foto do usuário" class="w-full h-full object-cover hidden">
+                <span id="sidebarUserInitial" class="text-sm font-semibold text-slate-700">U</span>
+            </div>
+            <div>
+                <p class="text-blue-200">Bem-vindo</p>
+                <p id="sidebarUserName" class="font-semibold text-white truncate">Usuário</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENU PRINCIPAL -->
+    <nav class="sidebar-nav p-4 space-y-2">
+        
+        <!-- RECURSOS HUMANOS -->
+        <div class="sidebar-category space-y-1" data-module="rh">
+            <button 
+                onclick="toggleSidebarSubmenu(this)" 
+                class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-blue-800 transition group">
+                <div class="flex items-center space-x-3 flex-1">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span class="font-semibold text-sm">Recursos Humanos</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
+            </button>
+            <div class="submenu hidden pl-4 space-y-1">
+                <a href="javascript:void(0)" data-page="rh" data-tab="colaboradores" data-permission="rh-colaboradores" onclick="sidebarNavigate('rh', 'colaboradores'); return false;" 
+                   class="block p-2 rounded-lg text-sm hover:bg-blue-800 transition text-blue-200 hover:text-white">
+                    📋 Colaboradores
+                </a>
+                <a href="javascript:void(0)" data-page="rh" data-tab="tabela" data-permission="rh-tabela" onclick="sidebarNavigate('rh', 'tabela'); return false;" 
+                   class="block p-2 rounded-lg text-sm hover:bg-blue-800 transition text-blue-200 hover:text-white">
+                    📊 Tabela de Colaboradores
+                </a>
+                <a href="javascript:void(0)" data-page="rh" data-tab="envio" data-permission="rh-envio" onclick="sidebarNavigate('rh', 'envio'); return false;" 
+                   class="block p-2 rounded-lg text-sm hover:bg-blue-800 transition text-blue-200 hover:text-white">
+                    ✉️ Envio de Documentações
+                </a>
+                <a href="javascript:void(0)" data-page="rh" data-tab="ferias" data-permission="rh-ferias" onclick="sidebarNavigate('rh', 'ferias'); return false;" 
+                   class="block p-2 rounded-lg text-sm hover:bg-blue-800 transition text-blue-200 hover:text-white">
+                    🌴 Programação de Férias
+                </a>
+            </div>
+        </div>
+
+        <!-- FINANCEIRO -->
+        <div class="sidebar-category space-y-1" data-module="financeiro">
+            <button 
+                onclick="toggleSidebarSubmenu(this)" 
+                class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-blue-800 transition group">
+                <div class="flex items-center space-x-3 flex-1">
+                    <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+                    <span class="font-semibold text-sm">Financeiro</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
+            </button>
+            <div class="submenu hidden pl-4 space-y-1">
+                <a href="javascript:void(0)" data-page="ged" data-tab="captura" data-permission="financeiro-captura" onclick="sidebarNavigate('ged', 'captura'); return false;" 
+                   class="block p-2 rounded-lg text-sm hover:bg-blue-800 transition text-blue-200 hover:text-white">
+                    📸 Captura & Classificação
+                </a>
+                <a href="javascript:void(0)" data-page="ged" data-tab="armazenamento" data-permission="financeiro-armazenamento" onclick="sidebarNavigate('ged', 'armazenamento'); return false;" 
+                   class="block p-2 rounded-lg text-sm hover:bg-blue-800 transition text-blue-200 hover:text-white">
+                    🗄️ Armazenamento e controle de fluxo
+                </a>
+                <a href="javascript:void(0)" data-page="ged" data-tab="relatorios" data-permission="financeiro-relatorios" onclick="sidebarNavigate('ged', 'relatorios'); return false;" 
+                   class="block p-2 rounded-lg text-sm hover:bg-blue-800 transition text-blue-200 hover:text-white">
+                    📈 Relatórios Financeiros & Fluxo de Caixa
+                </a>
+                <a href="javascript:void(0)" data-page="ged" data-tab="assinatura" data-permission="financeiro-relatorios" onclick="sidebarNavigate('ged', 'assinatura'); return false;" 
+                   class="block p-2 rounded-lg text-sm hover:bg-blue-800 transition text-blue-200 hover:text-white">
+                    ✉️ Parâmetros de Assinatura (E-mail)
+                </a>
+            </div>
+        </div>
+
+        <!-- GESTÃO -->
+        <div class="sidebar-category space-y-1" data-module="gestao">
+            <button 
+                onclick="toggleSidebarSubmenu(this)" 
+                class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-blue-800 transition group">
+                <div class="flex items-center space-x-3 flex-1">
+                    <i data-lucide="settings" class="w-5 h-5"></i>
+                    <span class="font-semibold text-sm">Gestão</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
+            </button>
+            <div class="submenu hidden pl-4 space-y-1">
+                <a href="javascript:void(0)" data-page="gestao" data-tab="cadastro-novos-usuarios" data-permission="gestao" onclick="sidebarNavigate('gestao', 'cadastro-novos-usuarios'); return false;" 
+                   class="block p-2 rounded-lg text-sm hover:bg-blue-800 transition text-blue-200 hover:text-white">
+                    👤 Cadastro de novos usuários
+                </a>
+                <a href="javascript:void(0)" data-page="gestao" data-tab="usuarios-cadastrados" data-permission="gestao" onclick="sidebarNavigate('gestao', 'usuarios-cadastrados'); return false;" 
+                   class="block p-2 rounded-lg text-sm hover:bg-blue-800 transition text-blue-200 hover:text-white">
+                    🧾 Usuários cadastrados
+                </a>
+            </div>
+        </div>
+
+        <!-- DIVIDER -->
+        <hr class="border-blue-800 my-4">
+
+        <!-- PERFIL E LOGOUT -->
+        <div class="space-y-1">
+            <a href="javascript:void(0)" onclick="openProfileModal(); return false;" 
+               class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-800 transition">
+                <i data-lucide="user" class="w-5 h-5"></i>
+                <span class="font-semibold text-sm">Meu Perfil</span>
+            </a>
+            <button onclick="logout(); return false;" 
+                    class="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-red-700 transition text-red-200 hover:text-white">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                <span class="font-semibold text-sm">Sair</span>
+            </button>
+        </div>
+    </nav>
+</aside>
+
+<!-- CONTEÚDO PRINCIPAL COM MARGEM -->
+<main id="mainContent" class="ml-64 transition-all duration-300">
+    <!-- Conteúdo será carregado aqui -->
+</main>
+
+<!-- BOTÃO TOGGLE SIDEBAR (Para mobile) -->
+<button id="sidebarToggle" 
+        onclick="toggleSidebar()" 
+        class="hidden fixed top-4 left-4 z-40 p-2 rounded-lg bg-blue-900 text-white md:hidden">
+    <i data-lucide="menu" class="w-6 h-6"></i>
+</button>
+
+<style>
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+    #sidebar {
+        transform: translateX(-100%);
+    }
+    
+    #sidebar.open {
+        transform: translateX(0);
+    }
+    
+    #mainContent {
+        margin-left: 0;
+    }
+    
+    #sidebarToggle {
+        display: block;
+    }
+}
+
+/* Animação de submenu */
+.submenu.open {
+    display: block !important;
+}
+
+/* Scroll da sidebar */
+#sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.sidebar-nav a.active {
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+}
+
+.sidebar-nav a.active:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+</style>

@@ -1,0 +1,257 @@
+/* ============================================
+   GUIA DE MUDANÇAS EXATAS - COPIAR E COLAR
+   ============================================ */
+
+/* ============================================
+   GED.HTML - MUDAR ESSAS PARTES
+   ============================================ */
+
+/* MUDANÇA 1: Adicione no HEAD */
+
+-- ANTES: (procure por </head>)
+    <link rel="stylesheet" href="style.css">
+</head>
+
+-- DEPOIS: (adicione script src="sidebar.js" antes de </head>)
+    <link rel="stylesheet" href="style.css">
+    <script src="sidebar.js"></script>
+</head>
+
+/* ============================================ */
+
+/* MUDANÇA 2: Remova TODA a tag <nav>...</nav> 
+
+ANTES: (apagar tudo isso)
+    <nav class="bg-blue-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <svg class="w-10 h-10" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    ...
+                </svg>
+                <div>
+                    <span class="font-bold text-lg block tracking-wide">NOVA ROMA</span>
+                    <span class="text-xs text-blue-200 block -mt-1">GED Financeiro & Assinatura</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="ged.html" id="navFinanceiro" class="text-xs font-semibold nav-tab bg-slate-100 text-slate-900 px-3 py-1.5 rounded-md hover:bg-slate-200 transition" data-page="ged">Financeiro</a>
+                <a href="rh.html" id="navRH" class="text-xs font-semibold nav-tab bg-slate-100 text-slate-900 px-3 py-1.5 rounded-md hover:bg-slate-200 transition" data-page="rh">Recursos Humanos</a>
+                <a href="gestao.html" id="navGestao" class="text-xs font-semibold nav-tab bg-slate-100 text-slate-900 px-3 py-1.5 rounded-md hover:bg-slate-200 transition" data-page="gestao">Gestão</a>
+                <div id="userStatus" class="hidden text-sm bg-blue-800 px-3 py-1.5 rounded-md border border-blue-700">Olá, Administrador</div>
+                <button id="logoutButton" onclick="logout()" class="hidden text-xs font-semibold bg-red-600 px-3 py-1.5 rounded-md hover:bg-red-700 transition">Sair</button>
+                <div class="text-sm bg-blue-800 px-3 py-1.5 rounded-md border border-blue-700">
+                    Ambiente Administrativo v2.5
+                </div>
+            </div>
+        </div>
+    </nav>
+
+/* ============================================ */
+
+/* MUDANÇA 3: Mude a tag <main> 
+
+ANTES:
+<main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+DEPOIS: (adicione ml-64 transition-all duration-300)
+<main class="max-w-7xl mx-auto px-4 py-8 ml-64 transition-all duration-300 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+/* ============================================
+   RH.HTML - MUDAR ESSAS PARTES
+   ============================================ */
+
+/* MUDANÇA 1: Adicione no HEAD */
+
+-- ANTES: (procure por </head>)
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+-- DEPOIS: (adicione script src="sidebar.js" antes de </head>)
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="sidebar.js"></script>
+</head>
+
+/* ============================================ */
+
+/* MUDANÇA 2: Remova TODA a tag <nav>...</nav> */
+
+ANTES: (apagar tudo isso)
+    <nav class="bg-blue-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <svg class="w-10 h-10" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    ...
+                </svg>
+                <div>
+                    <span class="font-bold text-lg block tracking-wide">NOVA ROMA</span>
+                    <span class="text-xs text-blue-200 block -mt-1">RH - GED</span>
+                </div>
+            </div>
+            <div class="flex items-center flex-wrap gap-2">
+                <a href="ged.html" class="text-xs font-semibold nav-tab bg-slate-100 text-slate-900 px-3 py-1.5 rounded-md hover:bg-slate-200 transition" data-page="ged">Financeiro</a>
+                <a href="rh.html" class="text-xs font-semibold nav-tab bg-slate-100 text-slate-900 px-3 py-1.5 rounded-md hover:bg-slate-200 transition" data-page="rh">RH</a>
+                <a href="gestao.html" class="text-xs font-semibold nav-tab bg-slate-100 text-slate-900 px-3 py-1.5 rounded-md hover:bg-slate-200 transition" data-page="gestao">Gestão</a>
+                <div id="userStatus" class="hidden text-sm bg-blue-800 px-3 py-1.5 rounded-md border border-blue-700">Olá, Administrador</div>
+                <button id="logoutButton" onclick="logout()" class="hidden text-xs font-semibold bg-red-600 px-3 py-1.5 rounded-md hover:bg-red-700 transition">Sair</button>
+                <div class="text-sm bg-blue-800 px-3 py-1.5 rounded-md border border-blue-700">Ambiente Administrativo v2.5</div>
+            </div>
+        </div>
+    </nav>
+
+/* ============================================ */
+
+/* MUDANÇA 3: Mude a tag <main> 
+
+ANTES:
+<main class="max-w-7xl mx-auto px-4 py-10">
+
+DEPOIS: (adicione ml-64 transition-all duration-300)
+<main class="max-w-7xl mx-auto px-4 py-10 ml-64 transition-all duration-300">
+
+/* ============================================
+   GESTAO.HTML - MUDAR ESSAS PARTES
+   ============================================ */
+
+/* MUDANÇA 1: Adicione no HEAD */
+
+-- ANTES: (procure por </head>)
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+-- DEPOIS: (adicione script src="sidebar.js" antes de </head>)
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="sidebar.js"></script>
+</head>
+
+/* ============================================ */
+
+/* MUDANÇA 2: Remova TODA a tag <nav>...</nav> */
+
+ANTES: (apagar tudo isso)
+    <nav class="bg-blue-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <svg class="w-10 h-10" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    ...
+                </svg>
+                <div>
+                    <span class="font-bold text-lg block tracking-wide">NOVA ROMA</span>
+                    <span class="text-xs text-blue-200 block -mt-1">Gestão - GED</span>
+                </div>
+            </div>
+            <div class="flex items-center flex-wrap gap-2">
+                <a href="ged.html" class="text-xs font-semibold nav-tab bg-slate-100 text-slate-900 px-3 py-1.5 rounded-md hover:bg-slate-200 transition" data-page="ged">Financeiro</a>
+                <a href="rh.html" class="text-xs font-semibold nav-tab bg-slate-100 text-slate-900 px-3 py-1.5 rounded-md hover:bg-slate-200 transition" data-page="rh">RH</a>
+                <a href="gestao.html" class="text-xs font-semibold nav-tab bg-slate-100 text-slate-900 px-3 py-1.5 rounded-md hover:bg-slate-200 transition" data-page="gestao">Gestão</a>
+                <div id="userStatus" class="hidden text-sm bg-blue-800 px-3 py-1.5 rounded-md border border-blue-700">Olá, Administrador</div>
+                <button id="logoutButton" onclick="logout()" class="hidden text-xs font-semibold bg-red-600 px-3 py-1.5 rounded-md hover:bg-red-700 transition">Sair</button>
+                <div class="text-sm bg-blue-800 px-3 py-1.5 rounded-md border border-blue-700">Ambiente Administrativo v2.5</div>
+            </div>
+        </div>
+    </nav>
+
+/* ============================================ */
+
+/* MUDANÇA 3: Mude a tag <main> 
+
+ANTES:
+<main class="max-w-7xl mx-auto px-4 py-10 space-y-8">
+
+DEPOIS: (adicione ml-64 transition-all duration-300)
+<main class="max-w-7xl mx-auto px-4 py-10 ml-64 transition-all duration-300 space-y-8">
+
+/* ============================================
+   RESUMO VISUAL
+   ============================================ */
+
+ARQUIVO       | MUDANÇA 1            | MUDANÇA 2        | MUDANÇA 3
+─────────────────────────────────────────────────────────────────────
+ged.html      | Add sidebar.js       | Remove <nav>     | ml-64 + classes
+rh.html       | Add sidebar.js       | Remove <nav>     | ml-64 + classes  
+gestao.html   | Add sidebar.js       | Remove <nav>     | ml-64 + classes
+
+/* ============================================
+   ANTES E DEPOIS VISUAL
+   ============================================ */
+
+ANTES (com navbar no topo):
+┌────────────────────────────────────────┐
+│  LOGO  FINANCEIRO  RH  GESTÃO  LOGOUT  │
+├────────────────────────────────────────┤
+│                                        │
+│  CONTEÚDO DA PÁGINA                    │
+│  (ocupa toda a largura)                │
+│                                        │
+└────────────────────────────────────────┘
+
+DEPOIS (com sidebar lateral):
+┌────────┬─────────────────────────────┐
+│ MENU   │ CONTEÚDO DA PÁGINA          │
+│        │                             │
+│ - RH   │ (recua para direita)        │
+│ - Fin  │                             │
+│ - Gest │                             │
+│        │                             │
+│        │ ml-64 cria margem esquerda  │
+├────────┤                             │
+│ Sair   │                             │
+└────────┴─────────────────────────────┘
+
+/* ============================================
+   CLASSES TAILWIND USADAS
+   ============================================ */
+
+ml-64              = margin-left: 16rem (64 * 0.25rem)
+transition-all     = todas as propriedades com animação
+duration-300       = 300ms de duração
+
+/* Em responsive mobile: */
+@media (max-width: 768px) {
+    - Sidebar fica oculta (translateX(-100%))
+    - ml-64 é removido do main
+    - Botão hamburger aparece
+}
+
+/* ============================================
+   TESTE RÁPIDO APÓS MUDANÇAS
+   ============================================ */
+
+1. Salve os arquivos
+2. Recarregue a página (Ctrl + R ou F5)
+3. Verifique:
+   ☑️ Sidebar aparece à esquerda
+   ☑️ Conteúdo tem margem esquerda
+   ☑️ Menu expande ao clicar
+   ☑️ Não há erro no console (F12)
+   ☑️ Nome do usuário aparece na sidebar
+
+/* ============================================
+   SE ALGO DER ERRADO
+   ============================================ */
+
+❌ Sidebar não aparece
+  → Verificar se script src="sidebar.js" está no HEAD
+  → Verificar console F12 para erros
+  → Verificar se sidebar.html existe em frontend/
+
+❌ Conteúdo não recua
+  → Verificar se ml-64 foi adicionado ao <main>
+  → Verificar se não há CSS conflitante
+  → Usar F12 Inspector para ver classes aplicadas
+
+❌ Menu não funciona
+  → Verificar se Lucide icons está carregando
+  → Verificar se sidebar.js está após script.js
+  → Limpar cache do navegador (Ctrl + Shift + Delete)
+
+/* ============================================
+   PRÓXIMO PASSO
+   ============================================ */
+
+Depois de fazer essas mudanças:
+
+1. npm start
+2. Fazer login com admin@novaroma.edu.br / Nova@123!
+3. Clicar nos itens do menu para testar
+4. Testar em mobile (F12 > Toggle device toolbar)
+5. Teste com outros usuários (financeiro, rh, observador)

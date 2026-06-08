@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão - GED Faculdade Nova Roma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="script.js"></script>
+    <script src="sidebar.js"></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <main class="max-w-7xl mx-auto px-4 py-10 space-y-8 md:ml-64">
+        <section class="bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
+            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+                <div>
+                    <h1 class="text-
+                    3xl font-bold text-slate-900">Gestão de GED</h1>
+                    <p class="text-sm text-slate-500 mt-2">Painel integrado com envio de documentos no GED, edição de parâmetros, indexadores, tags e criação de usuários com permissões específicas.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full sm:w-auto">
+                    <div class="rounded-3xl bg-slate-50 p-4 border border-slate-200">
+                        <p class="text-xs uppercase text-slate-500">Documentos</p>
+                        <p class="text-2xl font-bold text-slate-900" id="gestionDocCount">0</p>
+                    </div>
+                    <div class="rounded-3xl bg-slate-50 p-4 border border-slate-200">
+                        <p class="text-xs uppercase text-slate-500">Tags</p>
+                        <p class="text-2xl font-bold text-slate-900" id="gestionTagCount">0</p>
+                    </div>
+                    <div class="rounded-3xl bg-slate-50 p-4 border border-slate-200">
+                        <p class="text-xs uppercase text-slate-500">Usuários</p>
+                        <p class="text-2xl font-bold text-slate-900" id="gestionUserCount">0</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div id="parametrosMain" class="xl:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-200 p-6 space-y-6">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Gestão de Parâmetros GED</h2>
+                        <p class="text-sm text-slate-500">Selecione um documento para ajustar parâmetros, tags e indexadores a partir do painel de gestão.</p>
+                    </div>
+                    <div class="space-y-2 w-full sm:w-auto">
+                        <input id="gestionSearchInput" type="text" placeholder="Buscar documento, setor, tags ou ID" oninput="renderGestaoDocList()" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-slate-50">
+                        <button type="button" onclick="clearGestaoSearch()" class="w-full sm:w-auto text-xs font-semibold text-blue-900 border border-blue-900 px-4 py-2 rounded-xl hover:bg-blue-50 transition">Limpar busca</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                    <table class="w-full text-left text-sm text-slate-700" style="border-collapse: collapse;">
+                        <thead>
+                            <tr class="text-xs uppercase text-slate-500 border-b border-slate-200">
+                                <th class="p-3">Documento</th>
+                                <th class="p-3">Setor</th>
+                                <th class="p-3">Tipo</th>
+                                <th class="p-3">Tags</th>
+                                <th class="p-3">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gestaoDocTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div id="gestaoDocEditor" class="bg-slate-50 rounded-3xl border border-slate-200 p-6 hidden">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900" id="selectedDocTitle">Documento selecionado</h3>
+                            <p class="text-xs text-slate-500" id="selectedDocSubtitle">Edite parâmetros e indexadores do documento.</p>
+                        </div>
+                        <button type="button" onclick="saveSelectedDocChanges()" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-blue-900 text-white text-sm font-semibold hover:bg-blue-800 transition"><i data-lucide="save" class="w-4 h-4"></i>Salvar alterações</button>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Tipo de Documento</label>
+                            <input id="selectedDocType" type="text" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Setor / Centro de Custo</label>
+                            <select id="selectedDocSector" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                                <option value="Financeiro">Financeiro</option>
+                                <option value="Acadêmico">Acadêmico</option>
+                                <option value="RH / DP">RH / DP</option>
+                                <option value="TI Infra">TI Infra</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Identificador</label>
+                            <input id="selectedDocIdentifier" type="text" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Valor (R$)</label>
+                            <input id="selectedDocValue" type="number" step="0.01" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Categoria Financeira</label>
+                            <select id="selectedDocFinanceType" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                                <option value="Despesa">Despesa</option>
+                                <option value="Receita">Receita</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Status de Assinatura</label>
+                            <select id="selectedDocStatus" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                                <option value="Pendente Assinatura">Pendente Assinatura</option>
+                                <option value="Assinado & Arquivado">Assinado & Arquivado</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mt-6">
+                        <div class="xl:col-span-2">
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Tags do Documento</label>
+                            <input id="selectedDocTags" type="text" placeholder="Separe por vírgula" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                            <p class="text-xs text-slate-400 mt-2">Use tags para facilitar a pesquisa de documentos no GED.</p>
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">E-mail de Envio</label>
+                            <input id="selectedDocEmail" type="email" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                        </div>
+                    </div>
+
+                    <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="rounded-3xl bg-white border border-slate-200 p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <p class="text-sm font-bold text-slate-900">Indexadores do documento</p>
+                                    <p class="text-xs text-slate-500">Inclua e exclua indexadores que ajudem a organizar o GED.</p>
+                                </div>
+                                <button type="button" onclick="copySelectedDocInfo()" class="text-xs text-blue-900 hover:text-blue-700">Copiar resumo</button>
+                            </div>
+                            <div id="selectedDocIndexers" class="space-y-2"></div>
+                            <div class="flex gap-2 mt-4">
+                                <input id="newIndexerInput" type="text" placeholder="Novo indexador" class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                                <button type="button" onclick="addDocIndexer()" class="px-4 py-3 rounded-xl bg-green-600 text-white text-sm hover:bg-green-700 transition">Adicionar</button>
+                            </div>
+                        </div>
+                        <div class="rounded-3xl bg-white border border-slate-200 p-4">
+                            <p class="text-sm font-bold text-slate-900 mb-3">Informações adicionais</p>
+                            <div class="space-y-3 text-sm text-slate-600">
+                                <p><strong>Data de envio:</strong> <span id="selectedDocDateSent">-</span></p>
+                                <p><strong>Data de pagamento:</strong> <span id="selectedDocDatePayment">-</span></p>
+                                <p><strong>Nota fiscal:</strong> <span id="selectedDocInvoiceNumber">-</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <aside class="space-y-6">
+                <div id="parametrosSection" class="rounded-3xl bg-white border border-slate-200 p-6">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Catálogo de tags</h3>
+                    <div class="flex gap-2 flex-wrap mb-4">
+                        <input id="newTagInput" type="text" placeholder="Nova tag" class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-slate-50">
+                        <button type="button" onclick="addTagToCatalog()" class="px-4 py-3 rounded-xl bg-blue-900 text-white text-sm hover:bg-blue-800 transition">Adicionar tag</button>
+                    </div>
+                    <div id="tagCatalogList" class="flex flex-wrap gap-2 p-2 bg-slate-50 rounded-lg"></div>
+                </div>
+
+                <div id="cadastroSection" class="rounded-3xl bg-white border border-slate-200 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">Gestão de Usuários</h3>
+                            <p class="text-sm text-slate-500">Cadastre novos usuários com permissões para Financeiro, RH ou ambos.</p>
+                        </div>
+                        <span class="text-xs uppercase text-slate-500">Senha segura</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Nome</label>
+                            <input id="newUserName" type="text" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">E-mail</label>
+                            <input id="newUserEmail" type="email" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Senha</label>
+                            <input id="newUserPassword" type="password" placeholder="Crie uma senha segura" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Foto de perfil (URL)</label>
+                            <input id="newUserPhotoUrl" type="url" placeholder="https://..." class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                        </div>
+                        <div class="space-y-2 text-sm text-slate-500">
+                            <p>O usuário pode definir uma senha agora; ela será criada no Supabase e poderá efetuar login imediatamente.</p>
+                            <p class="text-xs text-slate-400">Senhas padrão foram removidas.</p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs uppercase text-slate-500 mb-2 block">Perfil</label>
+                                <select id="newUserRole" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                                    <option value="administrador">Administrador</option>
+                                    <option value="usuario">Usuário Padrão</option>
+                                    <option value="observador">Observador</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs uppercase text-slate-500 mb-2 block">Acesso</label>
+                                <select id="newUserAccess" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                                    <option value="financeiro">Financeiro</option>
+                                    <option value="rh">RH</option>
+                                    <option value="ambos">Financeiro + RH</option>
+                                    <option value="apenas-observador">Apenas Documentos Enviados</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="rounded-3xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 space-y-4">
+                            <div>
+                                <p class="font-semibold text-slate-900 mb-2">Permissões detalhadas</p>
+                                <p class="text-xs text-slate-500">Escolha exatamente o que este usuário poderá ver no menu.</p>
+                            </div>
+                            <div class="flex gap-3 items-center">
+                                <label class="inline-flex items-center gap-2"><input id="newUserPermissionFinanceiroAll" type="checkbox" class="rounded border-slate-300 text-blue-900"><span class="font-semibold">Financeiro (tudo)</span></label>
+                                <label class="inline-flex items-center gap-2"><input id="newUserPermissionRHAll" type="checkbox" class="rounded border-slate-300 text-blue-900"><span class="font-semibold">RH (tudo)</span></label>
+                            </div>
+                            <div class="grid grid-cols-1 gap-3">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <label class="inline-flex items-center gap-2"><input id="newUserPermissionFinanceiroCaptura" type="checkbox" class="rounded border-slate-300 text-blue-900"><span>Financeiro: Captura & Classificação</span></label>
+                                    <label class="inline-flex items-center gap-2"><input id="newUserPermissionFinanceiroArmazenamento" type="checkbox" class="rounded border-slate-300 text-blue-900"><span>Financeiro: Armazenamento e Fluxo</span></label>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <label class="inline-flex items-center gap-2"><input id="newUserPermissionFinanceiroRelatorios" type="checkbox" class="rounded border-slate-300 text-blue-900"><span>Financeiro: Relatórios & Fluxo</span></label>
+                                    <label class="inline-flex items-center gap-2"><input id="newUserPermissionGestao" type="checkbox" class="rounded border-slate-300 text-blue-900"><span>Gestão de Usuários</span></label>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <label class="inline-flex items-center gap-2"><input id="newUserPermissionRHColaboradores" type="checkbox" class="rounded border-slate-300 text-blue-900"><span>RH: Colaboradores</span></label>
+                                    <label class="inline-flex items-center gap-2"><input id="newUserPermissionRHTabela" type="checkbox" class="rounded border-slate-300 text-blue-900"><span>RH: Tabela de Colaboradores</span></label>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <label class="inline-flex items-center gap-2"><input id="newUserPermissionRHEnvio" type="checkbox" class="rounded border-slate-300 text-blue-900"><span>RH: Envio de Documentos</span></label>
+                                    <label class="inline-flex items-center gap-2"><input id="newUserPermissionRHFerias" type="checkbox" class="rounded border-slate-300 text-blue-900"><span>RH: Programação de Férias</span></label>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="createNewUser()" class="w-full rounded-xl bg-green-600 text-white px-4 py-3 text-sm font-semibold hover:bg-green-700 transition">Criar usuário</button>
+                    </div>
+                </div>
+
+                <div id="usuariosSection" class="rounded-3xl bg-white border border-slate-200 p-6">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Usuários cadastrados</h3>
+                    <div id="userList" class="space-y-3"></div>
+                </div>
+            </aside>
+        </section>
+    </main>
+
+    <div id="toast" class="fixed bottom-5 right-5 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition duration-300 pointer-events-none z-50">
+        <div class="bg-green-500 p-1.5 rounded-full text-white">
+            <i data-lucide="check" class="w-4 h-4"></i>
+        </div>
+        <div>
+            <p class="text-sm font-bold" id="toastTitle">Ação realizada</p>
+            <p class="text-xs text-gray-200" id="toastMsg">Operação concluída com sucesso.</p>
+        </div>
+    </div>
+
+    <script>
+        function loadGestaoUsers() {
+            const raw = localStorage.getItem('gedUsers');
+            if (!raw) return [];
+            try {
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function checkPermission() {
+            const activeUsername = localStorage.getItem('gedAuth');
+            const access = localStorage.getItem('gedUserAccess');
+            const rawDisplay = localStorage.getItem('gedUser') || activeUsername;
+            let displayName = rawDisplay;
+            try { const parsed = JSON.parse(rawDisplay); displayName = parsed?.name || parsed?.username || rawDisplay; } catch {}
+
+            if (!activeUsername) {
+                allowPublicAccess('gestao');
+            }
+
+            let modules = {};
+            try { modules = JSON.parse(localStorage.getItem('gedUserModules') || '{}'); } catch {}
+            const readOnly = localStorage.getItem('gedUserReadOnly') === 'true';
+
+            if (access === 'financeiro') { /* original behavior: redirect to GED */ }
+            if (access === 'rh') { /* original behavior: redirect to RH */ }
+            if (access === 'apenas-observador') { /* original behavior: redirect to OBSERVADOR */ }
+
+            if (!modules.gestao && access !== 'ambos') {
+                // grant temporary access to gestão for public sessions
+                modules.gestao = true;
+                localStorage.setItem('gedUserModules', JSON.stringify(modules));
+            }
+
+            const userStatusEl = document.getElementById('userStatus');
+            if (userStatusEl) { userStatusEl.innerText = `Olá, ${displayName}`; userStatusEl.classList.remove('hidden'); }
+            const logoutBtn = document.getElementById('logoutButton');
+            if (logoutBtn) logoutBtn.classList.remove('hidden');
+            if (readOnly && typeof applyObserverMode === 'function') setTimeout(applyObserverMode, 100);
+            return true;
+        }
+
+        
+
+        function escapeHTML(value) {
+            return String(value || '').replace(/[&<>'"]/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[char]);
+        }
+
+        function validateEmail(value) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+        }
+
+        async function hashPassword(password) {
+            if (!window.crypto || !window.crypto.subtle) {
+                throw new Error('Navegador não suporta hashing seguro. Atualize para um navegador moderno.');
+            }
+            const data = new TextEncoder().encode(password);
+            const digest = await window.crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(digest)).map(byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+
+        function logout() {
+            localStorage.removeItem('gedAuth');
+            localStorage.removeItem('gedUser');
+            localStorage.removeItem('gedUserRole');
+            localStorage.removeItem('gedUserAccess');
+            window.location.href = 'index.html';
+        }
+
+        const defaultGedDocuments = [
+            {
+                id: 1,
+                name: "Contrato_Fornecedor_TI_V1.pdf",
+                type: "Contrato Prestação",
+                sector: "TI Infra",
+                identifier: "04.223.102/0001-90",
+                value: "15400.00",
+                financeType: "Despesa",
+                tags: ["TI", "Fornecedor", "Contrato"],
+                indexers: ["Projeto TI", "Infra"],
+                email: "diretoria@novaroma.com.br",
+                flow: "Sequencial",
+                security: "Token E-mail",
+                status: "Pendente Assinatura",
+                date: "18/05/2026",
+                dateSent: "18/05/2026",
+                datePayment: "25/05/2026",
+                invoiceNumber: "NF-7788"
+            },
+            {
+                id: 2,
+                name: "NF_9921_Papelaria_Recife.pdf",
+                type: "Nota Fiscal",
+                sector: "Financeiro",
+                identifier: "10.400.221/0001-11",
+                value: "1250.00",
+                financeType: "Despesa",
+                tags: ["Financeiro", "Papelaria", "NF"],
+                indexers: ["Material", "Despesa"],
+                email: "coordenacao@novaroma.com.br",
+                flow: "Paralelo",
+                security: "Apenas Link",
+                status: "Assinado & Arquivado",
+                date: "15/05/2026",
+                dateSent: "15/05/2026",
+                datePayment: "20/05/2026",
+                invoiceNumber: "NF-9921"
+            },
+            {
+                id: 3,
+                name: "Contrato_Estagio_Afonso_Pena_V2.pdf",
+                type: "Contrato Prestação",
+                sector: "RH / DP",
+                identifier: "RA-20252001",
+                value: "0.00",
+                financeType: "Despesa",
+                tags: ["RH", "Estágio"],
+                indexers: ["Estágio", "Afonso Pena"],
+                email: "estagios@novaroma.com.br",
+                flow: "Sequencial",
+                security: "ICP-Brasil",
+                status: "Pendente Assinatura",
+                date: "17/05/2026",
+                dateSent: "17/05/2026",
+                datePayment: "", 
+                invoiceNumber: ""
+            }
+        ];
+
+        const defaultTagCatalog = ["Urgente", "Fiscal", "Tributos", "Contrato", "Aprovado"];
+        const defaultUsers = [];
+
+        let gedDocuments = [];
+        let tagCatalog = [];
+        let users = [];
+        let selectedDocId = null;
+
+        function loadFromStorage(key, fallback) {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            try {
+                const parsed = JSON.parse(raw);
+                return parsed;
+            } catch (error) {
+                return fallback;
+            }
+        }
+
+        function saveToStorage(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        function loadGestaoState() {
+            gedDocuments = loadFromStorage('gedDocuments', defaultGedDocuments);
+            tagCatalog = loadFromStorage('gedTagCatalog', defaultTagCatalog);
+            users = [];
+        }
+
+        function saveGestaoState() {
+            saveToStorage('gedDocuments', gedDocuments);
+            saveToStorage('gedTagCatalog', tagCatalog);
+            saveToStorage('gedUsers', users);
+        }
+
+        function getSafeString(value) {
+            return String(value || '').trim();
+        }
+
+        function formatTagLabel(tag) {
+            return getSafeString(tag).replace(/\s+/g, ' ').trim();
+        }
+
+        function renderGestaoDocList() {
+            const query = (document.getElementById('gestionSearchInput').value || '').toLowerCase();
+            const tbody = document.getElementById('gestaoDocTableBody');
+            tbody.innerHTML = '';
+            const filtered = gedDocuments.filter(doc => {
+                const tags = Array.isArray(doc.tags) ? doc.tags.join(' ') : '';
+                return doc.name.toLowerCase().includes(query) ||
+                    doc.type.toLowerCase().includes(query) ||
+                    doc.sector.toLowerCase().includes(query) ||
+                    doc.identifier.toLowerCase().includes(query) ||
+                    (doc.email || '').toLowerCase().includes(query) ||
+                    tags.toLowerCase().includes(query);
+            });
+
+            filtered.forEach(doc => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-200 hover:bg-slate-100 transition">
+                        <td class="p-3 font-semibold text-slate-900">${escapeHTML(doc.name)}</td>
+                        <td class="p-3">${escapeHTML(doc.sector)}</td>
+                        <td class="p-3">${escapeHTML(doc.type)}</td>
+                        <td class="p-3">${(doc.tags || []).map(tag => `<span class="inline-flex items-center px-2 py-1 rounded-full text-[10px] bg-blue-100 text-blue-800 mr-1 mb-1">${escapeHTML(tag)}</span>`).join('')}</td>
+                        <td class="p-3">
+                            <button type="button" onclick="selectGestaoDoc(${doc.id})" class="text-xs font-semibold text-blue-900 hover:text-blue-700">Editar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('gestionDocCount').innerText = filtered.length;
+        }
+
+        function selectGestaoDoc(id) {
+            selectedDocId = id;
+            const doc = gedDocuments.find(item => item.id === id);
+            if (!doc) return;
+            document.getElementById('gestaoDocEditor').classList.remove('hidden');
+            document.getElementById('selectedDocTitle').innerText = doc.name;
+            document.getElementById('selectedDocSubtitle').innerText = `ID ${doc.identifier} • ${doc.sector}`;
+            document.getElementById('selectedDocType').value = doc.type || '';
+            document.getElementById('selectedDocSector').value = doc.sector || 'Financeiro';
+            document.getElementById('selectedDocIdentifier').value = doc.identifier || '';
+            document.getElementById('selectedDocValue').value = doc.value || '';
+            document.getElementById('selectedDocFinanceType').value = doc.financeType || 'Despesa';
+            document.getElementById('selectedDocStatus').value = doc.status || 'Pendente Assinatura';
+            document.getElementById('selectedDocEmail').value = doc.email || '';
+            document.getElementById('selectedDocTags').value = (doc.tags || []).join(', ');
+            document.getElementById('selectedDocDateSent').innerText = doc.dateSent || '-';
+            document.getElementById('selectedDocDatePayment').innerText = doc.datePayment || '-';
+            document.getElementById('selectedDocInvoiceNumber').innerText = doc.invoiceNumber || '-';
+            renderSelectedDocIndexers();
+        }
+
+        function renderSelectedDocIndexers() {
+            const doc = gedDocuments.find(item => item.id === selectedDocId);
+            const container = document.getElementById('selectedDocIndexers');
+            container.innerHTML = '';
+            if (!doc || !Array.isArray(doc.indexers) || doc.indexers.length === 0) {
+                container.innerHTML = '<p class="text-sm text-slate-500">Nenhum indexador cadastrado para este documento.</p>';
+                return;
+            }
+
+            doc.indexers.forEach((indexer, index) => {
+                container.innerHTML += `
+                    <div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 border border-slate-200 px-4 py-3">
+                        <span class="text-sm text-slate-700">${indexer}</span>
+                        <button type="button" onclick="removeDocIndexer(${index})" class="text-xs font-semibold text-red-600 hover:text-red-800">Remover</button>
+                    </div>
+                `;
+            });
+        }
+
+        function addDocIndexer() {
+            const input = document.getElementById('newIndexerInput');
+            const value = formatTagLabel(input.value);
+            if (!value) return;
+            const doc = gedDocuments.find(item => item.id === selectedDocId);
+            if (!doc) return;
+            doc.indexers = Array.isArray(doc.indexers) ? doc.indexers : [];
+            if (!doc.indexers.includes(value)) {
+                doc.indexers.push(value);
+            }
+            input.value = '';
+            renderSelectedDocIndexers();
+            saveGestaoState();
+        }
+
+        function removeDocIndexer(index) {
+            const doc = gedDocuments.find(item => item.id === selectedDocId);
+            if (!doc || !Array.isArray(doc.indexers)) return;
+            doc.indexers.splice(index, 1);
+            renderSelectedDocIndexers();
+            saveGestaoState();
+        }
+
+        function saveSelectedDocChanges() {
+            const doc = gedDocuments.find(item => item.id === selectedDocId);
+            if (!doc) return;
+            doc.type = document.getElementById('selectedDocType').value;
+            doc.sector = document.getElementById('selectedDocSector').value;
+            doc.identifier = document.getElementById('selectedDocIdentifier').value;
+            doc.value = document.getElementById('selectedDocValue').value;
+            doc.financeType = document.getElementById('selectedDocFinanceType').value;
+            doc.status = document.getElementById('selectedDocStatus').value;
+            doc.email = document.getElementById('selectedDocEmail').value;
+            doc.tags = document.getElementById('selectedDocTags').value.split(',').map(tag => formatTagLabel(tag)).filter(Boolean);
+            doc.dateSent = document.getElementById('selectedDocDateSent').innerText !== '-' ? document.getElementById('selectedDocDateSent').innerText : doc.dateSent;
+            saveGestaoState();
+            renderGestaoDocList();
+            renderTagCatalog();
+            showToast('Documento salvo', 'Os parâmetros e tags foram atualizados com sucesso.');
+        }
+
+        function addTagToCatalog() {
+            const input = document.getElementById('newTagInput');
+            const value = formatTagLabel(input.value);
+            if (!value) {
+                showToast('Tag inválida', 'Informe um nome de tag antes de adicionar.', 'bg-red-700');
+                return;
+            }
+            if (!tagCatalog.includes(value)) {
+                tagCatalog.push(value);
+                saveGestaoState();
+            }
+            input.value = '';
+            renderTagCatalog();
+            showToast('Tag adicionada', `Tag "${value}" foi incluída no catálogo.`, 'bg-green-700');
+        }
+
+        function removeTagFromCatalog(tag) {
+            tagCatalog = tagCatalog.filter(item => item !== tag);
+            saveGestaoState();
+            renderTagCatalog();
+            showToast('Tag removida', `Tag "${tag}" removida do catálogo.`, 'bg-red-700');
+        }
+
+        function renderTagCatalog() {
+            const container = document.getElementById('tagCatalogList');
+            container.innerHTML = '';
+            tagCatalog.forEach(tag => {
+                const safeTag = escapeHTML(tag);
+                container.innerHTML += `
+                    <div class="inline-flex items-center gap-2 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-2">
+                        <span>${safeTag}</span>
+                        <button type="button" onclick='removeTagFromCatalog(${JSON.stringify(safeTag)})' class="text-blue-900 hover:text-blue-700"><i data-lucide="x" class="w-3 h-3"></i></button>
+                    </div>
+                `;
+            });
+            document.getElementById('gestionTagCount').innerText = tagCatalog.length;
+            lucide.createIcons();
+        }
+        function setupPermissionSectorToggles(prefix) {
+            if (!prefix) return;
+            const finAll = document.getElementById(`${prefix}PermissionFinanceiroAll`);
+            const rhAll = document.getElementById(`${prefix}PermissionRHAll`);
+            const finChildren = [
+                `${prefix}PermissionFinanceiroCaptura`,
+                `${prefix}PermissionFinanceiroArmazenamento`,
+                `${prefix}PermissionFinanceiroRelatorios`
+            ];
+            const rhChildren = [
+                `${prefix}PermissionRHColaboradores`,
+                `${prefix}PermissionRHTabela`,
+                `${prefix}PermissionRHEnvio`,
+                `${prefix}PermissionRHFerias`
+            ];
+
+            function safeGet(id) { return document.getElementById(id); }
+
+            function updateMaster(masterEl, childIds) {
+                if (!masterEl) return;
+                const allChecked = childIds.every(id => !!safeGet(id)?.checked);
+                masterEl.checked = allChecked;
+            }
+
+            if (finAll) {
+                finAll.addEventListener('change', () => {
+                    finChildren.forEach(id => { const el = safeGet(id); if (el) el.checked = finAll.checked; });
+                });
+                finChildren.forEach(id => {
+                    const el = safeGet(id);
+                    if (el) {
+                        el.addEventListener('change', () => updateMaster(finAll, finChildren));
+                    }
+                });
+                updateMaster(finAll, finChildren);
+            }
+
+            if (rhAll) {
+                rhAll.addEventListener('change', () => {
+                    rhChildren.forEach(id => { const el = safeGet(id); if (el) el.checked = rhAll.checked; });
+                });
+                rhChildren.forEach(id => {
+                    const el = safeGet(id);
+                    if (el) {
+                        el.addEventListener('change', () => updateMaster(rhAll, rhChildren));
+                    }
+                });
+                updateMaster(rhAll, rhChildren);
+            }
+        }
+
+        async function createNewUser() {
+            const name = document.getElementById('newUserName').value.trim();
+            const email = document.getElementById('newUserEmail').value.trim();
+            const password = document.getElementById('newUserPassword') ? document.getElementById('newUserPassword').value : '';
+            const photo = document.getElementById('newUserPhotoUrl').value.trim();
+            const role = document.getElementById('newUserRole').value;
+            let access = document.getElementById('newUserAccess').value;
+
+            if (!name || !email || !password) {
+                showToast('Preencha todos os campos', 'Nome, e-mail e senha são obrigatórios.', 'bg-red-700');
+                return;
+            }
+            if (!validateEmail(email)) {
+                showToast('E-mail inválido', 'Informe um endereço de e-mail válido.', 'bg-red-700');
+                return;
+            }
+            if (!validatePassword(password)) {
+                showToast('Senha fraca', 'A senha precisa ter 8 caracteres, letras, números e símbolos.', 'bg-red-700');
+                return;
+            }
+
+            const normalizedEmail = email.toLowerCase();
+            if (users.some(user => user.email?.toLowerCase() === normalizedEmail || user.username?.toLowerCase() === normalizedEmail)) {
+                showToast('Usuário existente', 'Já existe um usuário cadastrado com este e-mail.', 'bg-red-700');
+                return;
+            }
+
+            if (role === 'observador') {
+                access = 'apenas-observador';
+            }
+
+            const username = normalizedEmail;
+            const modules = buildUserModulesFromPermissions('newUser', access);
+
+            // Tenta criar usuário no backend (Supabase via API)
+            try {
+                const payload = {
+                    name: name,
+                    username: username,
+                    password: password,
+                    access: access
+                };
+                const res = await apiCreateUser(payload);
+                // API retorna { user }
+                const created = res && (res.user || res);
+                if (created && created.username) {
+                    // Atualiza lista local com dados retornados
+                    users.push({ id: created.id || Date.now(), username: created.username, name: created.name || name, email: normalizedEmail, photo, role, access, modules, passwordHash: null });
+                    saveGestaoState();
+                    renderUserTable();
+                    clearUserForm();
+                    showToast('Usuário criado', `O usuário ${escapeHTML(name)} foi criado no banco. Faça login com: ${escapeHTML(username)}.`, 'bg-green-700');
+                    return;
+                }
+                throw new Error('Resposta inválida da API');
+            } catch (err) {
+                console.error('Erro criando usuário via API:', err);
+                showToast('Erro criando usuário', 'Não foi possível criar o usuário no banco de dados. Verifique a conexão e tente novamente.', 'bg-red-700');
+            }
+        }
+
+        function validatePassword(password) {
+            return /(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d])/.test(password) && password.length >= 8;
+        }
+
+        function clearUserForm() {
+            document.getElementById('newUserName').value = '';
+            document.getElementById('newUserEmail').value = '';
+            document.getElementById('newUserPhotoUrl').value = '';
+            document.getElementById('newUserRole').value = 'usuario';
+            document.getElementById('newUserAccess').value = 'financeiro';
+            ['newUserPermissionFinanceiroCaptura','newUserPermissionFinanceiroArmazenamento','newUserPermissionFinanceiroRelatorios','newUserPermissionRHColaboradores','newUserPermissionRHTabela','newUserPermissionRHEnvio','newUserPermissionRHFerias','newUserPermissionGestao'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.checked = false;
+            });
+        }
+
+        async function editUserPassword(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+
+            const newPassword = prompt(`Digite a nova senha para ${user.name}`);
+            if (!newPassword) return;
+
+            if (!validatePassword(newPassword)) {
+                showToast('Senha fraca', 'A senha precisa ter 8 caracteres, letras, números e símbolos.', 'bg-red-700');
+                return;
+            }
+
+            user.passwordHash = await hashPassword(newPassword);
+            saveGestaoState();
+            showToast('Senha alterada', `Senha do usuário ${escapeHTML(user.name)} atualizada com sucesso.`, 'bg-green-700');
+        }
+
+        function editUserInfo(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-slate-900">Editar usuário</h2>
+                        <button onclick="this.closest('.fixed').remove()" class="text-slate-400 hover:text-slate-600">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    <form id="editUserForm" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-2">Nome</label>
+                            <input type="text" id="editUserName" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none" required value="${escapeHTML(user.name)}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-2">E-mail</label>
+                            <input type="email" id="editUserEmail" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none" required value="${escapeHTML(user.email)}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-2">Foto de perfil (URL)</label>
+                            <input type="url" id="editUserPhotoUrl" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none" value="${escapeHTML(user.photo || '')}" placeholder="https://...">
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-2">Perfil</label>
+                                <select id="editUserRole" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                                    <option value="administrador" ${user.role==='administrador'?'selected':''}>Administrador</option>
+                                    <option value="usuario" ${user.role==='usuario'?'selected':''}>Usuário Padrão</option>
+                                    <option value="observador" ${user.role==='observador'?'selected':''}>Observador</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-2">Acesso</label>
+                                <select id="editUserAccess" class="w-full border border-slate-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                                    <option value="financeiro" ${user.access==='financeiro'?'selected':''}>Financeiro</option>
+                                    <option value="rh" ${user.access==='rh'?'selected':''}>RH</option>
+                                    <option value="ambos" ${user.access==='ambos'?'selected':''}>Financeiro + RH</option>
+                                    <option value="apenas-observador" ${user.access==='apenas-observador'?'selected':''}>Apenas Documentos Enviados</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="rounded-3xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-700 space-y-4">
+                            <div>
+                                <p class="font-semibold text-slate-900 mb-2">Permissões detalhadas</p>
+                            </div>
+                            <div class="flex gap-3 items-center">
+                                <label class="inline-flex items-center gap-2"><input id="editUserPermissionFinanceiroAll" type="checkbox" class="rounded border-slate-300 text-blue-900" ${user.modules?.['financeiro-captura'] && user.modules?.['financeiro-armazenamento'] && user.modules?.['financeiro-relatorios'] ? 'checked' : ''}><span class="font-semibold">Financeiro (tudo)</span></label>
+                                <label class="inline-flex items-center gap-2"><input id="editUserPermissionRHAll" type="checkbox" class="rounded border-slate-300 text-blue-900" ${user.modules?.['rh-colaboradores'] && user.modules?.['rh-tabela'] && user.modules?.['rh-envio'] && user.modules?.['rh-ferias'] ? 'checked' : ''}><span class="font-semibold">RH (tudo)</span></label>
+                            </div>
+                            <div class="grid grid-cols-1 gap-3">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <label class="inline-flex items-center gap-2"><input id="editUserPermissionFinanceiroCaptura" type="checkbox" class="rounded border-slate-300 text-blue-900" ${user.modules?.['financeiro-captura'] ? 'checked' : ''}><span>Financeiro: Captura & Classificação</span></label>
+                                    <label class="inline-flex items-center gap-2"><input id="editUserPermissionFinanceiroArmazenamento" type="checkbox" class="rounded border-slate-300 text-blue-900" ${user.modules?.['financeiro-armazenamento'] ? 'checked' : ''}><span>Financeiro: Armazenamento e Fluxo</span></label>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <label class="inline-flex items-center gap-2"><input id="editUserPermissionFinanceiroRelatorios" type="checkbox" class="rounded border-slate-300 text-blue-900" ${user.modules?.['financeiro-relatorios'] ? 'checked' : ''}><span>Financeiro: Relatórios & Fluxo</span></label>
+                                    <label class="inline-flex items-center gap-2"><input id="editUserPermissionGestao" type="checkbox" class="rounded border-slate-300 text-blue-900" ${user.modules?.gestao ? 'checked' : ''}><span>Gestão de Usuários</span></label>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <label class="inline-flex items-center gap-2"><input id="editUserPermissionRHColaboradores" type="checkbox" class="rounded border-slate-300 text-blue-900" ${user.modules?.['rh-colaboradores'] ? 'checked' : ''}><span>RH: Colaboradores</span></label>
+                                    <label class="inline-flex items-center gap-2"><input id="editUserPermissionRHTabela" type="checkbox" class="rounded border-slate-300 text-blue-900" ${user.modules?.['rh-tabela'] ? 'checked' : ''}><span>RH: Tabela de Colaboradores</span></label>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <label class="inline-flex items-center gap-2"><input id="editUserPermissionRHEnvio" type="checkbox" class="rounded border-slate-300 text-blue-900" ${user.modules?.['rh-envio'] ? 'checked' : ''}><span>RH: Envio de Documentos</span></label>
+                                    <label class="inline-flex items-center gap-2"><input id="editUserPermissionRHFerias" type="checkbox" class="rounded border-slate-300 text-blue-900" ${user.modules?.['rh-ferias'] ? 'checked' : ''}><span>RH: Programação de Férias</span></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="this.closest('.fixed').remove()" class="flex-1 px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition">Cancelar</button>
+                            <button type="submit" class="flex-1 px-4 py-2 rounded-xl bg-blue-900 text-white font-semibold hover:bg-blue-800 transition">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            try { setupPermissionSectorToggles('editUser'); } catch(e) { /* ignore */ }
+
+            document.getElementById('editUserForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newName = document.getElementById('editUserName').value.trim();
+                const newEmail = document.getElementById('editUserEmail').value.trim().toLowerCase();
+                const newPhoto = document.getElementById('editUserPhotoUrl').value.trim();
+                const newRole = document.getElementById('editUserRole').value;
+                const newAccess = document.getElementById('editUserAccess').value;
+
+                if (!newName || !validateEmail(newEmail)) {
+                    showToast('Dados inválidos', 'Verifique nome e e-mail.', 'bg-red-700');
+                    return;
+                }
+
+                if (users.some(u => u.id !== userId && (u.email || '').toLowerCase() === newEmail)) {
+                    showToast('E-mail duplicado', 'Já existe outro usuário com este e-mail.', 'bg-red-700');
+                    return;
+                }
+
+                user.name = newName;
+                user.email = newEmail;
+                user.username = newEmail;
+                user.photo = newPhoto;
+                user.role = newRole;
+                user.access = newRole === 'observador' ? 'apenas-observador' : newAccess;
+                user.modules = buildUserModulesFromPermissions('editUser', user.access);
+
+                saveGestaoState();
+                renderUserTable();
+                modal.remove();
+                showToast('Usuário atualizado', `Dados de ${escapeHTML(user.name)} foram atualizados.`, 'bg-green-700');
+            });
+        }
+
+        
+        async function deleteUser(userId) {
+
+            const user = users.find(u => u.id === userId);
+
+            if (!user) return;
+
+            // Impede excluir admin principal
+            if (user.username === 'admin') {
+
+                showToast(
+                    'Ação bloqueada',
+                    'O administrador principal não pode ser excluído.',
+                    'bg-red-700'
+               );
+
+               return;
+     }
+
+             // =========================
+             // IMPEDIR EXCLUIR ÚLTIMO ADMINISTRADOR
+             // =========================
+             if (user.role === 'administrador') {
+
+                   const admins = users.filter(
+                       u => u.role === 'administrador'
+                   );
+
+             if (admins.length <= 1) {
+
+                showToast(
+                    'Ação bloqueada',
+                    'O sistema precisa ter pelo menos um administrador.',
+                    'bg-red-700'
+                );
+
+                return;
+            }
+        }
+
+             // =========================
+             // IMPEDIR EXCLUIR USUÁRIOS PADRÃO
+             // =========================
+             const protectedUsers = [
+                 'admin',
+                 'rh.teste',
+                 'observador.teste'
+         ];
+
+             if (protectedUsers.includes(user.username)) {
+
+                 showToast(
+                     'Usuário protegido',
+                     'Este usuário faz parte do sistema padrão e não pode ser removido.',
+                     'bg-red-700'
+            );
+
+             return;
+         }
+            const confirmDelete = confirm(
+                `Deseja realmente excluir o usuário ${user.name}?`
+           );
+
+           if (!confirmDelete) return;
+
+           try {
+               // Deleta do banco de dados via API
+               await apiDeleteUser(userId);
+
+               // Remove da lista local apenas após sucesso na API
+               users = users.filter(u => u.id !== userId);
+
+               saveGestaoState();
+
+               renderUserTable();
+
+               showToast(
+                   'Usuário excluído',
+                   `${user.name} foi removido do banco de dados com sucesso.`,
+                   'bg-green-700'
+               );
+           } catch (err) {
+               console.error('Erro deletando usuário:', err);
+               showToast(
+                   'Erro ao excluir',
+                   'Não foi possível remover o usuário. Verifique a conexão e tente novamente.',
+                   'bg-red-700'
+               );
+           }
+ }
+
+        function renderUserTable() {
+            const container = document.getElementById('userList');
+            container.innerHTML = '';
+
+            users.forEach((user, idx) => {
+                const displayAccess =
+                    user.access === 'ambos'
+                        ? 'Financeiro + RH'
+                        : user.access === 'apenas-observador'
+                        ? 'Apenas Documentos Enviados'
+                        : escapeHTML(user.access);
+                const initials = escapeHTML((user.name || 'U').trim().charAt(0).toUpperCase());
+
+                container.innerHTML += `
+                    <div class="user-card flex items-center justify-between p-4 rounded-2xl border border-slate-200 bg-white shadow-sm ${idx===0? 'last-registered':''}">
+                        <div class="flex items-center gap-4">
+                            <div class="user-avatar w-12 h-12 rounded-full overflow-hidden bg-slate-100 flex items-center justify-center text-sm font-semibold text-slate-700">
+                                ${user.photo ? `<img src="${escapeHTML(user.photo)}" alt="${escapeHTML(user.name)}" class="avatar-img">` : initials}
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-slate-900">${escapeHTML(user.name)}</div>
+                                <div class="text-xs text-slate-500 mt-1">${escapeHTML(user.role)} • ${displayAccess}</div>
+                            </div>
+                        </div>
+                        <div class="user-actions flex items-center gap-2">
+                            <button type="button" onclick="editUserInfo(${user.id})" class="text-xs bg-gray-600 text-white px-3 py-1 rounded-lg hover:bg-gray-700 transition">Editar</button>
+                            <button type="button" onclick="editUserPassword(${user.id})" class="text-xs bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition">Senha</button>
+                            <button type="button" onclick="deleteUser(${user.id})" class="text-xs bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition">Excluir</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('gestionUserCount').innerText = users.length;
+        }
+
+        function clearGestaoSearch() {
+            document.getElementById('gestionSearchInput').value = '';
+            renderGestaoDocList();
+        }
+
+        function showToast(title, msg, bgColor = 'bg-gray-900') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMsg').innerText = msg;
+            toast.className = `fixed bottom-5 right-5 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transform opacity-100 translate-y-0 transition duration-300 pointer-events-auto z-50 ${bgColor}`;
+            setTimeout(() => {
+                toast.className = `fixed bottom-5 right-5 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transform opacity-0 translate-y-20 transition duration-300 pointer-events-none z-50 ${bgColor}`;
+            }, 5000);
+        }
+
+        function highlightActiveTab() {
+            const currentPage = window.location.pathname.split('/').pop() || 'gestao.html';
+            const navTabs = document.querySelectorAll('.nav-tab');
+            navTabs.forEach(tab => {
+                if (tab.getAttribute('data-page') === currentPage.replace('.html', '')) {
+                    tab.classList.remove('bg-slate-100', 'text-slate-900', 'hover:bg-slate-200');
+                    tab.classList.add('bg-yellow-400', 'text-slate-900', 'font-bold');
+                } else {
+                    tab.classList.remove('bg-yellow-400', 'font-bold');
+                    tab.classList.add('bg-slate-100', 'text-slate-900');
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (!checkPermission()) return;
+            highlightActiveTab();
+            // Tenta sincronizar usuários com o backend; em caso de falha, carrega local
+            try {
+                const listRes = await apiListUsers();
+                const list = listRes && (listRes.users || listRes) || [];
+                users = Array.isArray(list) ? list.map(u => ({
+                    id: u.id,
+                    username: u.username,
+                    name: u.name || u.nome || '',
+                    email: u.username,
+                    photo: u.photo || '',
+                    role: u.role || 'usuario',
+                    access: u.access || u.acesso || 'ambos',
+                    modules: u.modules || {},
+                    passwordHash: null
+                })) : [];
+                localStorage.removeItem('gedUsers');
+            } catch (err) {
+                console.warn('Não foi possível carregar usuários do backend, usando dados locais.', err);
+                loadGestaoState();
+            }
+            renderGestaoDocList();
+            renderTagCatalog();
+            renderUserTable();
+            try { setupPermissionSectorToggles('newUser'); } catch(e) { /* ignore */ }
+            const paramsInit = new URLSearchParams(window.location.search);
+            const section = (paramsInit.get('tab') || '').toLowerCase();
+            if (section) showGestaoSection(section);
+        });
+            // abrir seção a partir de ?tab=
+            const params = new URLSearchParams(window.location.search);
+            const t = (params.get('tab') || '').toLowerCase();
+            if (t) {
+                if (t.includes('cadastro') || t.includes('novo')) {
+                    const el = Array.from(document.querySelectorAll('h2,h3')).find(h => /gestão de usuários|cadastro de novos usuários/i.test(h.innerText));
+                    if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
+                } else if (t.includes('usuarios') || t.includes('controle') ) {
+                    const el = Array.from(document.querySelectorAll('h2,h3')).find(h => /usuários cadastrados|gestão de usuários/i.test(h.innerText));
+                    if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
+                } else if (t.includes('parametros') || t.includes('tags')) {
+                    const el = document.getElementById('tagCatalogList') || Array.from(document.querySelectorAll('h2,h3')).find(h => /catálogo de tags|gestão de parâmetros/i.test(h.innerText));
+                    if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
+                }
+            }
+
+            function showGestaoSection(sectionName) {
+                const mainParams = document.getElementById('parametrosMain');
+                const parametros = document.getElementById('parametrosSection');
+                const cadastro = document.getElementById('cadastroSection');
+                const usuarios = document.getElementById('usuariosSection');
+
+                // default: show all
+                if (!sectionName) {
+                    if (mainParams) mainParams.style.display = '';
+                    if (parametros) parametros.style.display = '';
+                    if (cadastro) cadastro.style.display = '';
+                    if (usuarios) usuarios.style.display = '';
+                    return;
+                }
+
+                // hide all first
+                if (mainParams) mainParams.style.display = 'none';
+                if (parametros) parametros.style.display = 'none';
+                if (cadastro) cadastro.style.display = 'none';
+                if (usuarios) usuarios.style.display = 'none';
+
+                if (sectionName.includes('cadastro') || sectionName.includes('novo')) {
+                    if (cadastro) cadastro.style.display = '';
+                } else if (sectionName.includes('usuarios')) {
+                    if (usuarios) usuarios.style.display = '';
+                } else if (sectionName.includes('parametros') || sectionName.includes('tags')) {
+                    if (mainParams) mainParams.style.display = '';
+                    if (parametros) parametros.style.display = '';
+                } else {
+                    // fallback: show all
+                    if (mainParams) mainParams.style.display = '';
+                    if (parametros) parametros.style.display = '';
+                    if (cadastro) cadastro.style.display = '';
+                    if (usuarios) usuarios.style.display = '';
+                }
+            }
+    </script>
+</body>
+</html>

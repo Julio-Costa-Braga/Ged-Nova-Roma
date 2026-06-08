@@ -1,0 +1,12 @@
+# Mudanças de upload a preservar em rh.html:
+
+1. Na função uploadDocFile (linha ~460):
+   - Substituir chamada JSON apiFetch por FormData + fetch manual com Authorization header
+   - Enviar para POST /rh/colaboradores/{id}/documentos/upload
+   - Adicionar url_arquivo ao objeto de arquivo
+
+2. Na função editDocFile (linha ~510):
+   - Mesmo que uploadDocFile - usar FormData + fetch manual
+
+Essas são as ÚNICAS mudanças que devem ser aplicadas ao rh.html.
+Tudo mais deve ser restaurado para a versão anterior (anterior a 01/06/2026 11:03).

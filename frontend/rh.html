@@ -1,0 +1,2413 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RH - GED Faculdade Nova Roma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="script.js"></script>
+    <script src="sidebar.js"></script>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <main class="max-w-7xl mx-auto px-4 py-10 md:ml-64">
+        <section class="bg-white rounded-3xl shadow-sm border border-gray-200 p-8 mb-8">
+            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-900">Recursos Humanos</h1>
+                    <p class="text-sm text-slate-500 mt-2">Documentos de colaboradores organizados por pasta individual, com envio de contrato direto para a pasta do colaborador contratado.</p>
+                </div>
+                <div class="flex gap-2 flex-wrap">
+                    <button id="tabRHColaboradoresButton" onclick="setActiveHRTab('colaboradores')" class="observer-allow px-4 py-2 rounded-xl bg-blue-900 text-white text-sm font-semibold shadow-sm">Colaboradores</button>
+                    <button id="tabRHSendButton" onclick="setActiveHRTab('envio')" class="observer-allow px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold shadow-sm">Envio de Documentações</button>
+                    <button id="tabRHTableButton" onclick="setActiveHRTab('tabela')" class="observer-allow px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold shadow-sm">Tabela de Colaboradores</button>
+                    <button id="tabRHVacationButton" onclick="setActiveHRTab('ferias')" class="observer-allow px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold shadow-sm">Programação de Férias</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="tabRHDocs" class="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 mb-8">
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-4">
+                <div class="xl:col-span-1 space-y-4">
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-bold text-slate-900">Pastas de colaboradores</h3>
+                            <span class="text-xs text-slate-500" id="hrFilterCount">0</span>
+                        </div>
+                        <div class="flex gap-1 mb-4">
+                            <button type="button" onclick="setHRFilterStatus('todos')" id="filterTodos" class="text-xs px-3 py-1.5 rounded-lg bg-blue-900 text-white font-semibold flex-1 transition">Todos</button>
+                            <button type="button" onclick="setHRFilterStatus('ativos')" id="filterAtivos" class="text-xs px-3 py-1.5 rounded-lg bg-slate-200 text-slate-700 font-semibold flex-1 hover:bg-slate-300 transition">Ativos</button>
+                            <button type="button" onclick="setHRFilterStatus('inativos')" id="filterInativos" class="text-xs px-3 py-1.5 rounded-lg bg-slate-200 text-slate-700 font-semibold flex-1 hover:bg-slate-300 transition">Inativos</button>
+                        </div>
+                        <button type="button" onclick="openAddCollaboratorModal()" class="w-full text-xs font-semibold bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-3 py-2 rounded-xl transition flex items-center justify-center gap-1.5 mb-3">
+                            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                            <span>Novo Colaborador</span>
+                        </button>
+                        <div id="hrFolderList" class="space-y-3"></div>
+                    </div>
+                </div>
+                <div class="xl:col-span-3">
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between mb-4 gap-4">
+                            <div class="flex items-center gap-3">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-900" id="selectedHRFolderTitle">Selecione um colaborador</h3>
+                                    <p class="text-xs text-slate-500" id="selectedHRFolderInfo">Visualize os documentos anexados na pasta do colaborador selecionado.</p>
+                                </div>
+                                <button id="toggleActiveBtn" onclick="toggleCollaboratorStatus()" class="hidden text-xs px-3 py-1.5 rounded-lg font-semibold transition" title="Alternar status ativo/inativo"></button>
+                            </div>
+                            <div class="text-left xl:text-right">
+                                <p class="text-xs font-semibold text-slate-500 uppercase">Datas</p>
+                                <div class="flex items-center justify-start xl:justify-end gap-4 mt-2">
+                                    <div>
+                                        <label class="text-[10px] text-slate-500 block">Admissão</label>
+                                        <input type="date" id="hrAdmissionDate" onchange="updateAdmissionDate()" class="border border-slate-300 rounded-lg px-2 py-1.5 text-xs focus:ring-2 focus:ring-blue-900 outline-none w-40">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-slate-500 block">Demissão</label>
+                                        <input type="date" id="hrDismissalDate" onchange="updateDismissalDate()" class="border border-slate-300 rounded-lg px-2 py-1.5 text-xs focus:ring-2 focus:ring-blue-900 outline-none w-40">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DOCUMENT CATEGORIES -->
+                        <div id="hrDocumentCategories" class="space-y-0"></div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tabRHVacation" class="hidden bg-white rounded-3xl shadow-sm border border-gray-200 p-6 mb-8">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div class="bg-slate-50 rounded-2xl border border-slate-200 p-6 space-y-4">
+                    <h3 class="text-lg font-bold text-slate-900">Programação de Férias</h3>
+                    <p class="text-sm text-slate-500">Defina o período de férias do colaborador, adicione observações e acompanhe os avisos automáticos.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[10px] font-semibold text-slate-600 uppercase mb-2 block">Data de início</label>
+                            <input type="date" id="vacationStartDate" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-semibold text-slate-600 uppercase mb-2 block">Data de término</label>
+                            <input type="date" id="vacationEndDate" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="text-[10px] font-semibold text-slate-600 uppercase mb-2 block">Observação</label>
+                            <textarea id="vacationNote" rows="3" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none" placeholder="Escreva uma observação para as férias do colaborador"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <button type="button" onclick="saveVacationSchedule()" class="bg-blue-900 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-800 transition">Salvar Programação</button>
+                        <button type="button" onclick="editVacationSchedule()" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-slate-200 transition">Editar informações</button>
+                        <button type="button" onclick="deleteVacationSchedule()" class="bg-red-100 text-red-700 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-200 transition">Excluir programação</button>
+                    </div>
+                </div>
+                <div class="bg-slate-50 rounded-2xl border border-slate-200 p-6">
+                    <h3 class="text-base font-bold text-slate-900 mb-3">Resumo da Programação</h3>
+                    <p class="text-sm text-slate-500 mb-4">Visualize a situação atual das férias do colaborador selecionado.</p>
+                    <div id="vacationSchedulePreview" class="rounded-2xl bg-white border border-slate-200 p-4 text-sm text-slate-700">
+                        Nenhuma programação de férias registrada para este colaborador.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tabRHSendDocs" class="hidden bg-white rounded-3xl shadow-sm border border-gray-200 p-6 mb-8">
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div class="xl:col-span-2 bg-slate-50 rounded-2xl border border-slate-200 p-6">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Envio de Documentações</h3>
+                    <form id="hrContractForm" class="space-y-4">
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 uppercase mb-2 block">Colaborador</label>
+                            <select id="contractCollaborator" class="w-full border border-slate-300 rounded p-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none"></select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 uppercase mb-2 block">Tipo de documento</label>
+                            <input id="contractType" type="text" placeholder="Contrato CLT / PJ" class="w-full border border-slate-300 rounded p-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 uppercase mb-2 block">Arquivo</label>
+                            <input type="file" id="contractFileInput" class="w-full text-sm" onchange="updateContractFileName()">
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 uppercase mb-2 block">Observação</label>
+                            <textarea id="contractNote" rows="3" class="w-full border border-slate-300 rounded p-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none" placeholder="Anexar documento ao colaborador"></textarea>
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-slate-600 uppercase mb-2 block">Destinatários (e‑mail obrigatório)</label>
+                            <div class="flex gap-2 mb-2">
+                                <input type="email" id="contractRecipientEmail" placeholder="email@exemplo.com" class="w-full border border-slate-300 rounded p-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                                <button type="button" onclick="addContractEmailRecipient()" class="bg-indigo-700 text-white px-4 py-2 rounded-xl whitespace-nowrap">Adicionar</button>
+                            </div>
+                            <div id="contractRecipientsList" class="space-y-2 text-sm text-slate-700"></div>
+                            <p class="text-xs text-slate-400 mt-2">O documento será enviado ao colaborador selecionado e anexado automaticamente na pasta dele.</p>
+                        </div>
+                        <button type="button" onclick="sendHRContract()" class="w-full bg-blue-900 text-white py-3 rounded-xl font-semibold hover:bg-blue-800 transition">Enviar Documentação</button>
+                        <p class="text-xs text-slate-500">Ao enviar, o arquivo será anexado em "CONTRATOS E REGISTROS" da pasta do colaborador escolhido.</p>
+                        <p id="contractUploadName" class="text-xs text-slate-500"></p>
+                    </form>
+                </div>
+                <div class="bg-slate-50 rounded-2xl border border-slate-200 p-6">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Resumo por pasta</h3>
+                    <div id="hrFolderSummary" class="space-y-3"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tabRHTable" class="hidden bg-white rounded-3xl shadow-sm border border-gray-200 p-6 mb-8">
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Tabela de Colaboradores</h3>
+                        <p class="text-xs text-slate-500">Todos os colaboradores registrados no sistema — filtros e edição em massa.</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full md:w-auto">
+                        <input id="hrEmployeeTableFilter" type="text" placeholder="Filtrar tabela..." class="w-full sm:w-auto border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none" oninput="renderEmployeeTable()">
+                        <button type="button" onclick="exportEmployeeTableExcel()" class="text-xs font-semibold bg-green-100 text-green-700 px-4 py-2 rounded-xl hover:bg-green-200 transition flex items-center gap-1">
+                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                            <span>Exportar Excel</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto max-h-[650px] overflow-y-auto">
+                    <table class="w-full text-xs border border-slate-200 bg-white" style="border-collapse: collapse;">
+                        <thead class="sticky top-0 z-10">
+                            <tr class="bg-slate-100 uppercase text-slate-600 text-[10px]">
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Matrícula</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Admissão</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Demissão</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Função</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Locação</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Unidade</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Situação</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Data Nasc.</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Dia</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Mês Aniversário</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Idade</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Remuneração</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Telefone</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">RG</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">CPF</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">PIS-PASEP</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Sexo</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Pai-Mãe</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Titulação</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Curso</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">Tempo Serviço</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">E-mail Pessoal</th>
+                                <th class="p-2 border border-slate-200 whitespace-nowrap">E-mail Corporativo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hrEmployeeTableBody" class="text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="toast" class="fixed bottom-5 right-5 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition duration-300 pointer-events-none z-50">
+        <div class="bg-green-500 p-1.5 rounded-full text-white">
+            <i data-lucide="check" class="w-4 h-4"></i>
+        </div>
+        <div>
+            <p class="text-sm font-bold" id="toastTitle">Ação realizada</p>
+            <p class="text-xs text-gray-200" id="toastMsg">Operação concluída com sucesso.</p>
+        </div>
+    </div>
+
+    <script>
+        const DOCUMENT_CATEGORIES = [
+            "RG - CPF - CERTIDÃO DE NASCIMENTO OU CASAMENTO",
+            "PIS",
+            "CTPS DIGITAL",
+            "TITULO DE ELEITOR + COMPROVANTE DE ULTIMA VOTAÇÃO",
+            "RESERVISTA",
+            "DOCUMENTOS DOS DEPENDENTES (FILHOS)",
+            "CPF DO CÔNJUGUE",
+            "COMPROVANTE DE RESIDENCIA",
+            "COMPROVANTE DE ESCOLARIDADE",
+            "FOTO 3X4",
+            "CARTÃO DE PASSAGEM (SE FOR OPTANTE)",
+            "ASO (EXAME)",
+            "CONTA BANCARIA (ITAU)",
+            "CONTRATOS E REGISTROS"
+        ];
+
+        const RH_MOVIMENTACOES_CATEGORIES = [
+            "Aviso de férias",
+            "Atestados medico",
+            "Ocorrências e desligamento"
+        ];
+
+        function buildEmptyDocumentFolders() {
+            const folders = {};
+            DOCUMENT_CATEGORIES.forEach(cat => { folders[cat] = { files: [] }; });
+            return folders;
+        }
+
+        function buildEmptyRHFolders() {
+            const folders = {};
+            RH_MOVIMENTACOES_CATEGORIES.forEach(cat => { folders[cat] = { files: [] }; });
+            return folders;
+        }
+
+        const EMPLOYEE_TABLE_COLUMNS = [
+            "Matricula", "Admissão", "Demissão", "Função", "Locação", "Unidade",
+            "Situação", "Data Nascimento", "Dia", "Mês Aniversário", "Idade",
+            "Remuneração", "Telefone", "RG", "CPF", "PIS-PASEP",
+            "Sexo", "Pai-Mãe", "Titulação", "Curso", "Tempo Serviço",
+            "E-mail Pessoal", "E-mail Corporativo"
+        ];
+
+        const hrCollaborators = [];
+
+        let selectedHRCollaboratorId = null;
+        let contractRecipientsTemp = [];
+        let hrFilterStatus = 'todos';
+        let hrCurrentView = 'colaboradores';
+
+        function populateContractRecipientOptions() {
+            // No-op: recipients now use email input
+        }
+
+        function addContractEmailRecipient() {
+            const input = document.getElementById('contractRecipientEmail');
+            const email = input.value.trim();
+            if (!email) {
+                showToast('E‑mail obrigatório', 'Digite um e‑mail para adicionar à fila.', 'bg-red-700');
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showToast('E‑mail inválido', 'Digite um endereço de e‑mail válido.', 'bg-red-700');
+                return;
+            }
+            if (contractRecipientsTemp.find(r => r.email === email)) {
+                showToast('E‑mail duplicado', 'Este e‑mail já está na fila.', 'bg-red-700');
+                return;
+            }
+            contractRecipientsTemp.push({ email: email, status: 'Pendente' });
+            input.value = '';
+            renderContractRecipients();
+        }
+
+        function renderContractRecipients() {
+            const container = document.getElementById('contractRecipientsList');
+            container.innerHTML = '';
+            contractRecipientsTemp.forEach((r, idx) => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between gap-3 bg-white p-2 rounded-lg border border-slate-200';
+                div.innerHTML = `
+                    <div class="text-sm"><strong>#${idx+1}</strong> ${r.email}</div>
+                    <div class="flex gap-2"> 
+                        <button class="text-xs px-3 py-1 bg-slate-100 rounded" onclick="moveContractRecipient(${idx}, -1)">↑</button>
+                        <button class="text-xs px-3 py-1 bg-slate-100 rounded" onclick="moveContractRecipient(${idx}, 1)">↓</button>
+                        <button class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded" onclick="removeContractRecipient(${idx})">Remover</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function removeContractRecipient(index) {
+            contractRecipientsTemp.splice(index, 1);
+            renderContractRecipients();
+        }
+
+        function moveContractRecipient(index, delta) {
+            const to = index + delta;
+            if (to < 0 || to >= contractRecipientsTemp.length) return;
+            const tmp = contractRecipientsTemp[to];
+            contractRecipientsTemp[to] = contractRecipientsTemp[index];
+            contractRecipientsTemp[index] = tmp;
+            renderContractRecipients();
+        }
+
+        function loadStoredUsers() {
+            const raw = localStorage.getItem('gedUsers');
+            if (!raw) return [];
+            try {
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function checkPermission() {
+            const activeUsername = localStorage.getItem('gedAuth');
+            const access = localStorage.getItem('gedUserAccess');
+            const rawDisplay = localStorage.getItem('gedUser') || activeUsername;
+            let displayName = rawDisplay;
+            try { const parsed = JSON.parse(rawDisplay); displayName = parsed?.name || parsed?.username || rawDisplay; } catch {}
+
+            if (!activeUsername) { allowPublicAccess('rh'); }
+
+            let modules = {};
+            try { modules = JSON.parse(localStorage.getItem('gedUserModules') || '{}'); } catch {}
+            let readOnly = localStorage.getItem('gedUserReadOnly') === 'true';
+
+            if (access === 'ambos' && activeUsername && activeUsername !== 'guest' && readOnly) {
+                localStorage.setItem('gedUserReadOnly', 'false');
+                readOnly = false;
+            }
+
+            if (access === 'financeiro') { /* redirect to GED in original behavior */ }
+            if (access === 'apenas-observador') { /* redirect to observador in original behavior */ }
+
+            if (access === 'rh' || access === 'ambos' || (modules && modules.rh)) {
+                const userStatus = document.getElementById('userStatus');
+                if (userStatus) { userStatus.innerText = `Olá, ${displayName}`; userStatus.classList.remove('hidden'); }
+                const logoutBtn = document.getElementById('logoutButton');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+                if (readOnly && typeof applyObserverMode === 'function') setTimeout(applyObserverMode, 100);
+                return true;
+            }
+
+            // fallback: enable public access to RH
+            modules.rh = true; localStorage.setItem('gedUserModules', JSON.stringify(modules));
+            return true;
+        }
+
+        function logout() {
+            localStorage.removeItem('gedAuth');
+            localStorage.removeItem('gedUser');
+            localStorage.removeItem('gedUserRole');
+            localStorage.removeItem('gedUserAccess');
+            localStorage.removeItem('gedUserModules');
+            localStorage.removeItem('gedUserReadOnly');
+            window.location.href = 'index.html';
+        }
+
+        function highlightActiveTab() {
+            const currentPage = window.location.pathname.split('/').pop() || 'rh.html';
+            const navTabs = document.querySelectorAll('.nav-tab');
+            
+            navTabs.forEach(tab => {
+                if (tab.getAttribute('data-page') === currentPage.replace('.html', '')) {
+                    tab.classList.remove('bg-slate-100', 'text-slate-900', 'hover:bg-slate-200');
+                    tab.classList.add('bg-yellow-400', 'text-slate-900', 'font-bold');
+                } else {
+                    tab.classList.remove('bg-yellow-400', 'font-bold');
+                    tab.classList.add('bg-slate-100', 'text-slate-900');
+                }
+            });
+        }
+
+        window.setActiveHRTab = function(tab) {
+            const colaboradoresTab = document.getElementById('tabRHDocs');
+            const envioTab = document.getElementById('tabRHSendDocs');
+            const tableTab = document.getElementById('tabRHTable');
+            const vacationTab = document.getElementById('tabRHVacation');
+            const colaboradoresButton = document.getElementById('tabRHColaboradoresButton');
+            const envioButton = document.getElementById('tabRHSendButton');
+            const tableButton = document.getElementById('tabRHTableButton');
+            const vacationButton = document.getElementById('tabRHVacationButton');
+            hrCurrentView = tab === 'tabela' ? 'tabela' : tab === 'envio' ? 'envio' : tab === 'ferias' ? 'ferias' : 'colaboradores';
+
+            // Mostrar/esconder seções
+            if (hrCurrentView === 'colaboradores') {
+                colaboradoresTab.classList.remove('hidden');
+                envioTab.classList.add('hidden');
+                tableTab.classList.add('hidden');
+                vacationTab.classList.add('hidden');
+            } else if (hrCurrentView === 'envio') {
+                colaboradoresTab.classList.add('hidden');
+                envioTab.classList.remove('hidden');
+                tableTab.classList.add('hidden');
+                vacationTab.classList.add('hidden');
+            } else if (hrCurrentView === 'tabela') {
+                colaboradoresTab.classList.add('hidden');
+                envioTab.classList.add('hidden');
+                tableTab.classList.remove('hidden');
+                vacationTab.classList.add('hidden');
+            } else if (hrCurrentView === 'ferias') {
+                colaboradoresTab.classList.add('hidden');
+                envioTab.classList.add('hidden');
+                tableTab.classList.add('hidden');
+                vacationTab.classList.remove('hidden');
+            }
+
+            // Atualizar botões
+            const setActiveButton = (button, active) => {
+                if (active) {
+                    button.classList.add('bg-blue-900', 'text-white');
+                    button.classList.remove('bg-slate-100', 'text-slate-700');
+                } else {
+                    button.classList.remove('bg-blue-900', 'text-white');
+                    button.classList.add('bg-slate-100', 'text-slate-700');
+                }
+            };
+
+            setActiveButton(colaboradoresButton, hrCurrentView === 'colaboradores');
+            setActiveButton(envioButton, hrCurrentView === 'envio');
+            setActiveButton(tableButton, hrCurrentView === 'tabela');
+            setActiveButton(vacationButton, hrCurrentView === 'ferias');
+
+            if (hrCurrentView === 'tabela') {
+                renderEmployeeTable();
+            }
+        };
+
+        function setHRFilterStatus(filter) {
+            hrFilterStatus = filter;
+            document.querySelectorAll('[id^="filter"]').forEach(btn => {
+                btn.classList.remove('bg-blue-900', 'text-white');
+                btn.classList.add('bg-slate-200', 'text-slate-700');
+            });
+            const activeBtn = document.getElementById('filter' + filter.charAt(0).toUpperCase() + filter.slice(1));
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-200', 'text-slate-700');
+                activeBtn.classList.add('bg-blue-900', 'text-white');
+            }
+            renderHRFolders();
+        }
+
+
+        function toggleCollaboratorStatus() {
+            const collaborator = hrCollaborators.find(c => c.id === selectedHRCollaboratorId);
+            if (!collaborator) return;
+            collaborator.active = !collaborator.active;
+            renderHRFolders();
+            renderHRDocuments(selectedHRCollaboratorId);
+            showToast(
+                `Colaborador ${collaborator.active ? 'Ativado' : 'Inativado'}`,
+                `${collaborator.name} agora está ${collaborator.active ? 'ativo' : 'inativo'}.`,
+                collaborator.active ? 'bg-green-700' : 'bg-red-700'
+            );
+        }
+
+        function uploadDocFile(collaboratorId, categoryKey) {
+            const collaborator = hrCollaborators.find(c => c.id === collaboratorId);
+            if (!collaborator) return;
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.pdf,.jpg,.jpeg,.png,.doc,.docx';
+            input.onchange = async function(e) {
+                if (input.files.length === 0) return;
+                const file = input.files[0];
+                const sizeKB = Math.round(file.size / 1024);
+                const sizeStr = sizeKB > 1024 ? (sizeKB / 1024).toFixed(1) + ' MB' : sizeKB + ' KB';
+
+                const form = new FormData();
+                form.append('file', file);
+                form.append('categoria', categoryKey);
+                form.append('tamanho', sizeStr);
+                form.append('tipo', file.type || '');
+                form.append('observacao', '');
+
+                try {
+                    const token = localStorage.getItem('gedUserToken');
+                    const res = await fetch(`${API_BASE}/rh/colaboradores/${collaboratorId}/documentos/upload`, {
+                        method: 'POST',
+                        headers: {
+                            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                        },
+                        credentials: 'same-origin',
+                        body: form
+                    });
+                    if (!res.ok) {
+                        const text = await res.text();
+                        throw new Error(text || 'Erro no upload');
+                    }
+                    const data = await res.json();
+                    const doc = data.documento || data || {};
+
+                    collaborator.documentFolders = collaborator.documentFolders || buildEmptyDocumentFolders();
+                    collaborator.documentFolders[categoryKey] = collaborator.documentFolders[categoryKey] || { files: [] };
+                    collaborator.documentFolders[categoryKey].files.unshift({
+                        id: doc.id || null,
+                        name: doc.nome_arquivo || file.name,
+                        uploadedAt: formatDateToBR(new Date()),
+                        size: sizeStr,
+                        url: doc.url_arquivo || ''
+                    });
+                    renderHRDocuments(collaboratorId);
+                    showToast('Arquivo enviado', `${file.name} adicionado em "${categoryKey}".`, 'bg-green-700');
+                } catch (err) {
+                    console.error('Erro ao enviar documento:', err);
+                    showToast('Erro ao enviar arquivo', 'Não foi possível salvar o documento no servidor.', 'bg-red-700');
+                }
+            };
+            input.click();
+        }
+
+        function editDocFile(collaboratorId, categoryKey, fileIndex) {
+            const collaborator = hrCollaborators.find(c => c.id === collaboratorId);
+            if (!collaborator) return;
+            const folder = collaborator.documentFolders[categoryKey];
+            if (!folder || !folder.files[fileIndex]) return;
+            const oldFile = folder.files[fileIndex];
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.pdf,.jpg,.jpeg,.png,.doc,.docx';
+            input.onchange = async function(e) {
+                if (input.files.length === 0) return;
+                const file = input.files[0];
+                const sizeKB = Math.round(file.size / 1024);
+                const sizeStr = sizeKB > 1024 ? (sizeKB / 1024).toFixed(1) + ' MB' : sizeKB + ' KB';
+                const payload = {
+                    colaborador_id: collaboratorId,
+                    categoria: categoryKey,
+                    nome_arquivo: file.name,
+                    tamanho: sizeStr,
+                    data_upload: new Date().toISOString().split('T')[0],
+                    tipo: file.type || ''
+                };
+                try {
+                    const form = new FormData();
+                    form.append('file', file);
+                    form.append('categoria', categoryKey);
+                    form.append('tamanho', sizeStr);
+                    form.append('tipo', file.type || '');
+                    form.append('observacao', '');
+
+                    const token = localStorage.getItem('gedUserToken');
+                    const res = await fetch(`${API_BASE}/rh/colaboradores/${collaboratorId}/documentos/upload`, {
+                        method: 'POST',
+                        headers: {
+                            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                        },
+                        credentials: 'same-origin',
+                        body: form
+                    });
+                    if (!res.ok) {
+                        const text = await res.text();
+                        throw new Error(text || 'Erro no upload');
+                    }
+                    const data = await res.json();
+                    const doc = data.documento || data || {};
+                    // remove old remote document if it has an id
+                    if (oldFile && oldFile.id) {
+                        try { await apiFetch(`/rh/documentos/${oldFile.id}`, { method: 'DELETE' }); } catch (e) { console.warn('Could not delete old document:', e); }
+                    }
+                    folder.files[fileIndex] = {
+                        id: doc.id || null,
+                        name: doc.nome_arquivo || file.name,
+                        uploadedAt: formatDateToBR(new Date()),
+                        size: sizeStr,
+                        url: doc.url_arquivo || ''
+                    };
+                    renderHRDocuments(collaboratorId);
+                    showToast('Arquivo substituído', `${file.name} atualizado em "${categoryKey}".`, 'bg-blue-700');
+                } catch (err) {
+                    console.error('Erro ao substituir documento:', err);
+                    showToast('Erro ao substituir arquivo', 'Não foi possível atualizar o documento no servidor.', 'bg-red-700');
+                }
+            };
+            input.click();
+        }
+
+        async function deleteDocFile(collaboratorId, categoryKey, fileIndex) {
+            const collaborator = hrCollaborators.find(c => c.id === collaboratorId);
+            if (!collaborator) return;
+            const folder = collaborator.documentFolders[categoryKey];
+            if (!folder || !folder.files[fileIndex]) return;
+            const fileObj = folder.files[fileIndex];
+            const fileName = fileObj.name || 'arquivo';
+            if (!confirm(`Excluir "${fileName}" de "${categoryKey}"?`)) return;
+            try {
+                if (fileObj && fileObj.id) {
+                    await apiFetch(`/rh/documentos/${fileObj.id}`, { method: 'DELETE' });
+                }
+            } catch (err) {
+                console.warn('Erro ao excluir documento remoto:', err);
+            }
+            folder.files.splice(fileIndex, 1);
+            renderHRDocuments(collaboratorId);
+            showToast('Arquivo excluído', `${fileName} removido de "${categoryKey}".`, 'bg-red-700');
+        }
+
+        function renderHRFolders() {
+            const folderList = document.getElementById('hrFolderList');
+            const collaboratorSelect = document.getElementById('contractCollaborator');
+            const summary = document.getElementById('hrFolderSummary');
+            folderList.innerHTML = '';
+            collaboratorSelect.innerHTML = '';
+            summary.innerHTML = '';
+
+            const filtered = hrCollaborators.filter(c => {
+                if (hrFilterStatus === 'ativos') return c.active;
+                if (hrFilterStatus === 'inativos') return !c.active;
+                return true;
+            });
+
+            document.getElementById('hrFilterCount').innerText = `${filtered.length} de ${hrCollaborators.length}`;
+
+            const recife = filtered.filter(c => (c.employeeData?.Unidade || '').toLowerCase() === 'recife');
+            const caruaru = filtered.filter(c => (c.employeeData?.Unidade || '').toLowerCase() === 'caruaru');
+            const outras = filtered.filter(c => {
+                const unid = (c.employeeData?.Unidade || '').toLowerCase();
+                return unid !== 'recife' && unid !== 'caruaru';
+            });
+
+            const renderGroup = (title, group) => {
+                if (group.length === 0) return;
+                const header = document.createElement('div');
+                header.className = 'text-[10px] uppercase font-bold text-slate-400 tracking-wider px-1 pt-2 pb-1';
+                header.innerText = `${title} (${group.length})`;
+                folderList.appendChild(header);
+                group.forEach(collaborator => {
+                    const totalFiles = Object.values(collaborator.documentFolders).reduce((sum, f) => sum + f.files.length, 0) + Object.values(collaborator.rhMovimentacoesFolders || {}).reduce((sum, f) => sum + f.files.length, 0);
+                    const activeBadge = collaborator.active
+                        ? '<span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"></span><span class="text-green-700">Ativo</span>'
+                        : '<span class="inline-block w-2 h-2 rounded-full bg-red-500 mr-1"></span><span class="text-red-700">Inativo</span>';
+
+                    const folder = document.createElement('div');
+                    folder.className = `relative p-4 rounded-2xl border cursor-pointer ${collaborator.id === selectedHRCollaboratorId ? 'border-blue-900 bg-blue-50' : 'border-slate-200 bg-white'} hover:border-blue-700 transition`;
+                    folder.onclick = () => selectHRFolder(collaborator.id);
+                    const unidade = collaborator.employeeData?.Unidade || 'Recife';
+                    folder.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-semibold text-slate-900">${collaborator.name}</p>
+                                <p class="text-xs text-slate-500">${collaborator.role}</p>
+                            </div>
+                            <span class="text-xs text-slate-500">${totalFiles} arquivo(s)</span>
+                        </div>
+                        <div class="mt-3 flex items-center justify-between gap-2">
+                            <p class="text-xs text-slate-500">${collaborator.path}</p>
+                            <span class="text-xs font-semibold flex items-center gap-1">${activeBadge}</span>
+                        </div>
+                        <div class="mt-2 flex items-center justify-between gap-1">
+                            <div class="relative">
+                                <button onclick="event.stopPropagation(); toggleUnitDropdown(event, ${collaborator.id})" class="text-[10px] font-semibold px-2 py-1 rounded-lg transition flex items-center gap-1 ${
+                                    unidade === 'Caruaru' ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-sky-100 text-sky-700 hover:bg-sky-200'
+                                }">
+                                    <i data-lucide="${unidade === 'Caruaru' ? 'map-pin' : 'building'}" class="w-3 h-3"></i>
+                                    <span id="unitLabel_${collaborator.id}">${unidade}</span>
+                                    <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                                </button>
+                                <div id="unitDropdown_${collaborator.id}" class="hidden absolute left-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-20 min-w-[120px] overflow-hidden">
+                                    <button onclick="event.stopPropagation(); selectUnitFromDropdown(${collaborator.id}, 'Recife')" class="w-full text-left text-xs px-3 py-2 hover:bg-sky-50 hover:text-sky-700 transition flex items-center gap-2 ${unidade === 'Recife' ? 'bg-sky-50 text-sky-700 font-semibold' : 'text-slate-700'}">
+                                        <i data-lucide="building" class="w-3 h-3"></i>
+                                        <span>Recife</span>
+                                        ${unidade === 'Recife' ? '<i data-lucide="check" class="w-3 h-3 ml-auto text-sky-600"></i>' : ''}
+                                    </button>
+                                    <button onclick="event.stopPropagation(); selectUnitFromDropdown(${collaborator.id}, 'Caruaru')" class="w-full text-left text-xs px-3 py-2 hover:bg-amber-50 hover:text-amber-700 transition flex items-center gap-2 ${unidade === 'Caruaru' ? 'bg-amber-50 text-amber-700 font-semibold' : 'text-slate-700'}">
+                                        <i data-lucide="map-pin" class="w-3 h-3"></i>
+                                        <span>Caruaru</span>
+                                        ${unidade === 'Caruaru' ? '<i data-lucide="check" class="w-3 h-3 ml-auto text-amber-600"></i>' : ''}
+                                    </button>
+                                </div>
+                            </div>
+                            <button onclick="event.stopPropagation(); openEditCollaboratorModal(${collaborator.id})" class="text-[10px] font-semibold bg-slate-100 text-slate-600 hover:bg-blue-100 hover:text-blue-700 px-2 py-1 rounded-lg transition flex items-center gap-1">
+                                <i data-lucide="pencil" class="w-3 h-3"></i>
+                                <span>Editar</span>
+                            </button>
+                        </div>
+                    `;
+                    folderList.appendChild(folder);
+                });
+            };
+
+            renderGroup('COLABORADOR UNIDADE RECIFE', recife);
+            renderGroup('COLABORADOR UNIDADE CARUARU', caruaru);
+            renderGroup('OUTRAS UNIDADES', outras);
+
+            filtered.forEach(collaborator => {
+                const option = document.createElement('option');
+                option.value = collaborator.id;
+                option.text = collaborator.name;
+                collaboratorSelect.appendChild(option);
+
+                const totalAdmDocs = Object.values(collaborator.documentFolders).reduce((sum, f) => sum + f.files.length, 0);
+                const totalMovDocs = Object.values(collaborator.rhMovimentacoesFolders || {}).reduce((sum, f) => sum + f.files.length, 0);
+                const summaryCard = document.createElement('div');
+                summaryCard.className = 'rounded-2xl bg-white p-4 border border-slate-200';
+                summaryCard.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-semibold text-slate-900">${collaborator.name}</p>
+                        <span class="text-xs ${collaborator.active ? 'text-green-600' : 'text-red-600'} font-semibold">${collaborator.active ? 'Ativo' : 'Inativo'}</span>
+                    </div>
+                    <p class="text-xs text-slate-500">${totalAdmDocs + totalMovDocs} documento(s) ao total</p>
+                    <p class="text-xs text-slate-500 mt-1">📁 ${totalAdmDocs} adm. | 📋 ${totalMovDocs} mov. RH</p>
+                    <p class="text-xs text-slate-500 mt-1">Pasta: ${collaborator.path}</p>
+                `;
+                summary.appendChild(summaryCard);
+            });
+        }
+
+        function selectHRFolder(id) {
+            selectedHRCollaboratorId = id;
+            loadCollaboratorDocuments(id).finally(() => {
+                renderHRFolders();
+                renderHRDocuments(id);
+            });
+        }
+
+        async function loadCollaboratorDocuments(collaboratorId) {
+            const collaborator = hrCollaborators.find(item => item.id === collaboratorId);
+            if (!collaborator) return;
+
+            try {
+                const res = await apiFetch(`/rh/colaboradores/${collaboratorId}/documentos`);
+                const items = (res && res.documentos) ? res.documentos : (res && Array.isArray(res) ? res : []);
+                const admissionFolders = buildEmptyDocumentFolders();
+                const movFolders = buildEmptyRHFolders();
+
+                items.forEach(item => {
+                    const category = item.categoria || 'Sem categoria';
+                    const target = RH_MOVIMENTACOES_CATEGORIES.includes(category) ? movFolders : admissionFolders;
+                    if (!target[category]) target[category] = { files: [] };
+                    target[category].files.unshift({
+                        id: item.id,
+                        name: item.nome_arquivo || 'Arquivo',
+                        uploadedAt: item.data_upload || formatDateToBR(item.created_at ? new Date(item.created_at) : new Date()),
+                        size: item.tamanho || '',
+                        url: item.url_arquivo || '',
+                        tipo: item.tipo || item.status || '',
+                        observacao: item.observacao || ''
+                    });
+                });
+
+                collaborator.documentFolders = admissionFolders;
+                collaborator.rhMovimentacoesFolders = movFolders;
+            } catch (err) {
+                console.error('Erro carregando documentos do colaborador:', err);
+            }
+        }
+
+        function renderHRDocuments(collaboratorId) {
+            const collaborator = hrCollaborators.find(item => item.id === collaboratorId);
+            const title = document.getElementById('selectedHRFolderTitle');
+            const info = document.getElementById('selectedHRFolderInfo');
+            const toggleBtn = document.getElementById('toggleActiveBtn');
+            const container = document.getElementById('hrDocumentCategories');
+
+            if (!collaborator) {
+                title.innerText = 'Selecione um colaborador';
+                info.innerText = 'Visualize os documentos anexados na pasta do colaborador selecionado.';
+                toggleBtn.classList.add('hidden');
+                container.innerHTML = '<div class="p-8 text-center text-slate-500 bg-white rounded-xl border border-slate-200">Selecione um colaborador para visualizar os documentos.</div>';
+                return;
+            }
+
+            const totalAdmFiles = Object.values(collaborator.documentFolders).reduce((sum, f) => sum + f.files.length, 0);
+            const totalRHFiles = Object.values(collaborator.rhMovimentacoesFolders || {}).reduce((sum, f) => sum + f.files.length, 0);
+            title.innerText = `${collaborator.name} — ${collaborator.role}`;
+            info.innerText = `Pasta: ${collaborator.path} | ${totalAdmFiles + totalRHFiles} arquivo(s)`;
+
+            toggleBtn.classList.remove('hidden');
+            toggleBtn.innerText = collaborator.active ? 'Desativar' : 'Ativar';
+            toggleBtn.className = `text-xs px-3 py-1.5 rounded-lg font-semibold transition ${
+                collaborator.active
+                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+            }`;
+
+            const admDateInput = document.getElementById('hrAdmissionDate');
+            const disDateInput = document.getElementById('hrDismissalDate');
+            if (collaborator.admissionDate) {
+                const parts = collaborator.admissionDate.split('/');
+                admDateInput.value = parts[2] + '-' + parts[1] + '-' + parts[0];
+            } else {
+                admDateInput.value = '';
+            }
+            if (collaborator.dismissalDate) {
+                const parts = collaborator.dismissalDate.split('/');
+                disDateInput.value = parts[2] + '-' + parts[1] + '-' + parts[0];
+            } else {
+                disDateInput.value = '';
+            }
+
+            renderEmployeeTable();
+            container.innerHTML = '';
+
+            // PASTA 1: DOCUMENTOS ADMISSÃO - click to open modal
+            const admCard = document.createElement('div');
+            admCard.className = 'flex items-center justify-between px-4 py-4 bg-indigo-50 border border-indigo-200 rounded-xl cursor-pointer hover:bg-indigo-100 transition shadow-sm';
+            admCard.onclick = function() { openAdmissionModal(collaboratorId); };
+            admCard.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-100 p-2 rounded-lg">
+                        <i data-lucide="folder-open" class="w-6 h-6 text-indigo-600"></i>
+                    </div>
+                    <div>
+                        <span class="text-sm font-bold text-indigo-900 uppercase">Documentos Admissão</span>
+                        <p class="text-xs text-indigo-600">${totalAdmFiles} arquivo(s) em ${DOCUMENT_CATEGORIES.length} categorias — clique para abrir</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="text-xs bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-full font-semibold">${totalAdmFiles} arquivo(s)</span>
+                    <button onclick="event.stopPropagation(); generateExternalLink(${collaboratorId})" class="text-xs bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1">
+                        <i data-lucide="link" class="w-3 h-3"></i>
+                        <span>Link Externo</span>
+                    </button>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-indigo-400"></i>
+                </div>
+            `;
+            container.appendChild(admCard);
+
+            // PASTA 2: MOVIMENTAÇÕES RH - click to open modal (sem link externo)
+            const rhCard = document.createElement('div');
+            rhCard.className = 'flex items-center justify-between px-4 py-4 bg-amber-50 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-100 transition shadow-sm';
+            rhCard.onclick = function() { openRHMovimentacoesModal(collaboratorId); };
+            rhCard.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="bg-amber-100 p-2 rounded-lg">
+                        <i data-lucide="activity" class="w-6 h-6 text-amber-600"></i>
+                    </div>
+                    <div>
+                        <span class="text-sm font-bold text-amber-900 uppercase">Movimentações RH</span>
+                        <p class="text-xs text-amber-600">${totalRHFiles} arquivo(s) em ${RH_MOVIMENTACOES_CATEGORIES.length} categorias — clique para abrir</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="text-xs bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full font-semibold">${totalRHFiles} arquivo(s)</span>
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-amber-400"></i>
+                </div>
+            `;
+            container.appendChild(rhCard);
+
+            lucide.createIcons();
+            renderVacationSchedule();
+        }
+
+        function parseBRDate(value) {
+            if (!value) return null;
+            const parts = value.split('/');
+            if (parts.length !== 3) return null;
+            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00`);
+        }
+
+        function formatDateToBR(date) {
+            if (!(date instanceof Date) || isNaN(date.getTime())) return '';
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function formatDateFromInput(value) {
+            if (!value) return '';
+            const parts = value.split('-');
+            if (parts.length !== 3) return '';
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function formatDateToInput(value) {
+            if (!value) return '';
+            const parts = value.split('/');
+            if (parts.length !== 3) return '';
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+
+        function getVacationNotifications(schedule) {
+            if (!schedule || !schedule.startDate) return [];
+            const start = parseBRDate(schedule.startDate);
+            if (!start) return [];
+            const now = new Date();
+            const reminders = [
+                { label: '1 mês antes', days: 30 },
+                { label: '15 dias antes', days: 15 },
+                { label: '7 dias antes', days: 7 }
+            ];
+            return reminders.map(reminder => {
+                const date = new Date(start);
+                date.setDate(date.getDate() - reminder.days);
+                return {
+                    label: reminder.label,
+                    date: formatDateToBR(date),
+                    status: date >= now ? 'Agendado' : 'Passado'
+                };
+            });
+        }
+
+        function renderVacationSchedule() {
+            const collaborator = hrCollaborators.find(c => c.id === selectedHRCollaboratorId);
+            const preview = document.getElementById('vacationSchedulePreview');
+
+            if (!collaborator) {
+                if (preview) preview.innerHTML = 'Selecione um colaborador para ver a programação de férias.';
+                return;
+            }
+
+            const history = collaborator.vacationScheduleHistory || [];
+            if (history.length > 0) {
+                const itemsHtml = history.map((schedule, index) => {
+                    const notifications = getVacationNotifications(schedule);
+                    const notificationsHtml = notifications.map(n => `
+                        <div class="flex items-center justify-between gap-3 rounded-xl bg-white p-3 border border-slate-200">
+                            <p class="text-sm font-semibold text-slate-800">${n.label}</p>
+                            <span class="text-[11px] ${n.status === 'Agendado' ? 'text-green-700 bg-green-100' : 'text-slate-500 bg-slate-100'} rounded-full px-2 py-1">${n.date} • ${n.status}</span>
+                        </div>
+                    `).join('');
+
+                    return `
+                        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4 space-y-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs uppercase tracking-wide text-slate-500">Programação ${history.length - index}</p>
+                                    <p class="mt-2 text-base font-semibold text-slate-900">${schedule.startDate} até ${schedule.endDate}</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-slate-600">${schedule.note || 'Sem observações adicionais.'}</p>
+                            <div class="space-y-2">
+                                ${notificationsHtml}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                preview.innerHTML = `
+                    <div class="space-y-4">
+                        ${itemsHtml}
+                    </div>
+                `;
+            } else {
+                preview.innerHTML = 'Nenhuma programação de férias registrada para este colaborador.';
+            }
+        }
+
+        function saveVacationSchedule() {
+            const collaborator = hrCollaborators.find(c => c.id === selectedHRCollaboratorId);
+            if (!collaborator) return;
+
+            const startInput = document.getElementById('vacationStartDate');
+            const endInput = document.getElementById('vacationEndDate');
+            const noteInput = document.getElementById('vacationNote');
+            const startValue = startInput.value;
+            const endValue = endInput.value;
+            const note = noteInput.value.trim();
+
+            if (!startValue || !endValue) {
+                showToast('Datas obrigatórias', 'Informe a data de início e término das férias.', 'bg-red-700');
+                return;
+            }
+
+            const startDate = new Date(startValue);
+            const endDate = new Date(endValue);
+            if (startDate > endDate) {
+                showToast('Datas inválidas', 'A data de início deve ser anterior ou igual à data de término.', 'bg-red-700');
+                return;
+            }
+
+            collaborator.vacationScheduleHistory = collaborator.vacationScheduleHistory || [];
+            collaborator.vacationScheduleHistory.unshift({
+                startDate: formatDateFromInput(startValue),
+                endDate: formatDateFromInput(endValue),
+                note: note
+            });
+
+            startInput.value = '';
+            endInput.value = '';
+            noteInput.value = '';
+            renderVacationSchedule();
+            showToast('Programação salva', `Férias agendadas de ${formatDateFromInput(startValue)} a ${formatDateFromInput(endValue)}.`, 'bg-green-700');
+        }
+
+        function editVacationSchedule() {
+            const collaborator = hrCollaborators.find(c => c.id === selectedHRCollaboratorId);
+            const history = collaborator?.vacationScheduleHistory || [];
+            if (!collaborator || history.length === 0) {
+                showToast('Nenhuma programação', 'Não há programação de férias para este colaborador.', 'bg-yellow-700');
+                return;
+            }
+            const latest = history[0];
+            const startInput = document.getElementById('vacationStartDate');
+            const endInput = document.getElementById('vacationEndDate');
+            const noteInput = document.getElementById('vacationNote');
+            startInput.value = formatDateToInput(latest.startDate);
+            endInput.value = formatDateToInput(latest.endDate);
+            noteInput.value = latest.note || '';
+            showToast('Editar programação', 'Altere as datas e clique em Salvar Programação para atualizar.', 'bg-blue-700');
+        }
+
+        function deleteVacationSchedule() {
+            const collaborator = hrCollaborators.find(c => c.id === selectedHRCollaboratorId);
+            const history = collaborator?.vacationScheduleHistory || [];
+            if (!collaborator || history.length === 0) {
+                showToast('Nada para excluir', 'Não existe programação de férias cadastrada.', 'bg-yellow-700');
+                return;
+            }
+            if (!confirm(`Excluir última programação de férias de ${collaborator.name}?`)) return;
+            collaborator.vacationScheduleHistory.shift();
+            renderVacationSchedule();
+            showToast('Programação excluída', `Última programação de férias de ${collaborator.name} foi removida.`, 'bg-red-700');
+        }
+
+        function renderEmployeeTable() {
+            const tbody = document.getElementById('hrEmployeeTableBody');
+            const filterValue = document.getElementById('hrEmployeeTableFilter')?.value.toLowerCase() || '';
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            let filtered = hrCollaborators.filter(c => {
+                const searchText = (c.name + ' ' + Object.values(c.employeeData || {}).join(' ')).toLowerCase();
+                return searchText.includes(filterValue);
+            });
+
+            // Quando estiver na visualização de tabela, mostra todos os colaboradores.
+            if (hrCurrentView !== 'tabela' && !filterValue && selectedHRCollaboratorId) {
+                filtered = filtered.filter(c => c.id === selectedHRCollaboratorId);
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="24" class="p-6 text-center text-slate-500">Nenhum funcionário encontrado.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(collaborator => {
+                const d = collaborator.employeeData || {};
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-50 transition';
+                let cellsHtml = '';
+                EMPLOYEE_TABLE_COLUMNS.forEach(key => {
+                    const val = d[key] || '';
+                    if (key === 'Matricula') {
+                        cellsHtml += `<td class="p-1.5 border border-slate-200 whitespace-nowrap font-semibold text-slate-800"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800">${val}</span></td>`;
+                    } else if (key === 'Locação') {
+                        const isProfessor = val === 'Professor';
+                        cellsHtml += `
+                            <td class="p-1.5 border border-slate-200 whitespace-nowrap text-center">
+                                <button onclick="toggleLocacao(${collaborator.id})" class="text-xs px-2 py-1 rounded-lg font-semibold transition flex items-center gap-1 mx-auto ${
+                                    isProfessor ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                                }">
+                                    <i data-lucide="${isProfessor ? 'graduation-cap' : 'building-2'}" class="w-3 h-3"></i>
+                                    <span>${val}</span>
+                                </button>
+                            </td>`;
+                    } else {
+                        cellsHtml += `
+                            <td class="p-1.5 border border-slate-200 whitespace-nowrap">
+                                <span class="editable-cell" data-collab-id="${collaborator.id}" data-field="${key}" onclick="editEmployeeCell(this)" title="Clique para editar">${val || '—'}</span>
+                            </td>`;
+                    }
+                });
+                cellsHtml += `
+                    <td class="p-1.5 border border-slate-200 whitespace-nowrap text-center">
+                        <button onclick="openEmployeeEditModal(${collaborator.id})" class="text-xs bg-slate-100 text-slate-600 hover:bg-blue-100 hover:text-blue-700 px-2 py-1.5 rounded-lg transition" title="Editar dados">
+                            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </td>`;
+                row.innerHTML = cellsHtml;
+                tbody.appendChild(row);
+            });
+            lucide.createIcons();
+        }
+
+        function editEmployeeCell(spanEl) {
+            const currentValue = spanEl.innerText === '—' ? '' : spanEl.innerText;
+            const collabId = parseInt(spanEl.dataset.collabId, 10);
+            const field = spanEl.dataset.field;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentValue;
+            input.className = 'w-full border border-blue-400 rounded px-1.5 py-0.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-400';
+            input.style.minWidth = '60px';
+
+            const finishEdit = () => {
+                const newValue = input.value.trim();
+                const collaborator = hrCollaborators.find(c => c.id === collabId);
+                if (collaborator && collaborator.employeeData) {
+                    collaborator.employeeData[field] = newValue;
+                    if (field === 'Situação') {
+                        collaborator.active = newValue.toLowerCase() === 'ativo';
+                        renderHRFolders();
+                    }
+                }
+                renderEmployeeTable();
+                showToast('Campo atualizado', `${field}: "${currentValue || '—'}" → "${newValue || '—'}"`, 'bg-blue-700');
+            };
+
+            input.onblur = finishEdit;
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') { input.blur(); }
+                if (e.key === 'Escape') { spanEl.innerText = currentValue || '—'; renderEmployeeTable(); }
+            };
+
+            spanEl.innerHTML = '';
+            spanEl.appendChild(input);
+            input.focus();
+            input.select();
+        }
+
+        function toggleLocacao(collabId) {
+            const collaborator = hrCollaborators.find(c => c.id === collabId);
+            if (!collaborator || !collaborator.employeeData) return;
+            const current = collaborator.employeeData["Locação"] || "Administrativo";
+            collaborator.employeeData["Locação"] = current === "Professor" ? "Administrativo" : "Professor";
+            renderEmployeeTable();
+            renderHRFolders();
+            showToast('Locação alterada', `${collaborator.name}: ${current} → ${collaborator.employeeData["Locação"]}`, 'bg-blue-700');
+        }
+
+        function openEmployeeEditModal(collabId) {
+            const collaborator = hrCollaborators.find(c => c.id === collabId);
+            if (!collaborator) return;
+            const d = collaborator.employeeData || {};
+
+            const existing = document.getElementById('employeeEditModal');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'employeeEditModal';
+            overlay.className = 'fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+            let fieldsHtml = '';
+            EMPLOYEE_TABLE_COLUMNS.forEach(key => {
+                const val = d[key] || '';
+                if (key === 'CPF') {
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key} <span class="text-red-500">*</span></label>
+                            <input type="text" id="editField_${key}" value="${val.replace(/"/g, '&quot;')}" maxlength="11" pattern="[0-9]{11}" placeholder="00000000000" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        </div>`;
+                } else if (key === 'Data Nascimento') {
+                    const nascDate = val ? val.split('/').reverse().join('-') : '';
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key}</label>
+                            <input type="date" id="editField_${key}" value="${nascDate}" onchange="calcAgeFromEdit('editField')" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        </div>`;
+                } else if (key === 'Idade' || key === 'Dia' || key === 'Mês Aniversário') {
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key}</label>
+                            <input type="text" id="editField_${key}" value="${val.replace(/"/g, '&quot;')}" readonly class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 text-slate-500">
+                        </div>`;
+                } else {
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key}</label>
+                            <input type="text" id="editField_${key}" value="${val.replace(/"/g, '&quot;')}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        </div>`;
+                }
+            });
+
+            overlay.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-100 p-2 rounded-lg">
+                                <i data-lucide="pencil" class="w-5 h-5 text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Editar Dados — ${collaborator.name}</h3>
+                                <p class="text-xs text-slate-500">Altere os campos desejados e clique em Salvar.</p>
+                            </div>
+                        </div>
+                        <button onclick="this.closest('#employeeEditModal').remove()" class="text-slate-500 hover:text-slate-900 rounded-full p-1.5 hover:bg-slate-200 transition">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="overflow-y-auto p-6">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            ${fieldsHtml}
+                        </div>
+                    </div>
+                    <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
+                        <span class="text-xs text-slate-400">CPF deve conter exatamente 11 dígitos.</span>
+                        <div class="flex gap-2">
+                            <button onclick="document.getElementById('employeeEditModal').remove()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2 rounded-xl text-sm font-semibold transition">Cancelar</button>
+                            <button onclick="saveEmployeeEdit(${collabId})" class="bg-blue-900 hover:bg-blue-800 text-white px-5 py-2 rounded-xl text-sm font-semibold transition">Salvar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+            lucide.createIcons();
+        }
+
+        function saveEmployeeEdit(collabId) {
+            const collaborator = hrCollaborators.find(c => c.id === collabId);
+            if (!collaborator || !collaborator.employeeData) return;
+
+            const cpfInput = document.getElementById('editField_CPF');
+            if (cpfInput) {
+                const cpf = cpfInput.value.replace(/\D/g, '');
+                if (cpf.length !== 11) {
+                    showToast('CPF inválido', 'O CPF deve conter exatamente 11 dígitos numéricos.', 'bg-red-700');
+                    cpfInput.focus();
+                    return;
+                }
+                cpfInput.value = cpf;
+            }
+
+            EMPLOYEE_TABLE_COLUMNS.forEach(key => {
+                const input = document.getElementById('editField_' + key);
+                if (input) {
+                    collaborator.employeeData[key] = input.value;
+                    if (key === 'Situação') {
+                        collaborator.active = input.value.toLowerCase() === 'ativo';
+                    }
+                }
+            });
+            document.getElementById('employeeEditModal')?.remove();
+            renderEmployeeTable();
+            renderHRFolders();
+            showToast('Dados atualizados', `Dados de ${collaborator.name} salvos com sucesso.`, 'bg-green-700');
+        }
+
+        function openAddCollaboratorModal() {
+            const existing = document.getElementById('addCollabModal');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'addCollabModal';
+            overlay.className = 'fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+            let fieldsHtml = `
+                <div class="flex flex-col gap-1 col-span-2 md:col-span-3">
+                    <label class="text-[10px] uppercase font-semibold text-slate-500">Nome do Colaborador</label>
+                    <input type="text" id="newCollabName" placeholder="Ex: João Silva" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] uppercase font-semibold text-slate-500">Cargo / Função</label>
+                    <input type="text" id="newCollabRole" placeholder="Ex: Professor" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] uppercase font-semibold text-slate-500">Ativo?</label>
+                    <select id="newCollabActive" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        <option value="true">Sim</option>
+                        <option value="false">Não</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] uppercase font-semibold text-slate-500">Data Admissão</label>
+                    <input type="date" id="newCollabAdmission" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] uppercase font-semibold text-slate-500">Data Demissão</label>
+                    <input type="date" id="newCollabDismissal" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                </div>
+            `;
+
+            EMPLOYEE_TABLE_COLUMNS.forEach(key => {
+                if (key === 'Matricula') {
+                    const nextId = hrCollaborators.length + 1;
+                    const nextMatricula = String(new Date().getFullYear()) + '-' + String(nextId).padStart(3, '0');
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key}</label>
+                            <input type="text" id="newField_${key}" value="${nextMatricula}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-slate-100">
+                        </div>`;
+                } else if (key === 'Locação') {
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key}</label>
+                            <select id="newField_${key}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                                <option value="Professor">Professor</option>
+                                <option value="Administrativo">Administrativo</option>
+                            </select>
+                        </div>`;
+                } else if (key === 'CPF') {
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key} <span class="text-red-500">*</span></label>
+                            <input type="text" id="newField_${key}" maxlength="11" pattern="[0-9]{11}" required placeholder="00000000000" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        </div>`;
+                } else if (key === 'Data Nascimento') {
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key}</label>
+                            <input type="date" id="newField_${key}" onchange="calcAgeFromAdd('newField')" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        </div>`;
+                } else if (key === 'Idade' || key === 'Dia' || key === 'Mês Aniversário') {
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key}</label>
+                            <input type="text" id="newField_${key}" readonly class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 text-slate-500">
+                        </div>`;
+                } else {
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key}</label>
+                            <input type="text" id="newField_${key}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        </div>`;
+                }
+            });
+
+            overlay.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-emerald-50 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-emerald-100 p-2 rounded-lg">
+                                <i data-lucide="user-plus" class="w-5 h-5 text-emerald-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Novo Colaborador</h3>
+                                <p class="text-xs text-slate-500">Preencha os dados abaixo para adicionar um novo colaborador ao sistema.</p>
+                            </div>
+                        </div>
+                        <button onclick="this.closest('#addCollabModal').remove()" class="text-slate-500 hover:text-slate-900 rounded-full p-1.5 hover:bg-slate-200 transition">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="overflow-y-auto p-6">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            ${fieldsHtml}
+                        </div>
+                    </div>
+                    <div class="px-6 py-4 border-t border-slate-200 bg-emerald-50 flex items-center justify-between shrink-0">
+                        <span class="text-xs text-slate-400">CPF deve conter exatamente 11 dígitos. Os dados serão vinculados à pasta, documentos e planilha.</span>
+                        <div class="flex gap-2">
+                            <button onclick="document.getElementById('addCollabModal').remove()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2 rounded-xl text-sm font-semibold transition">Cancelar</button>
+                            <button onclick="addNewCollaborator()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-1">
+                                <i data-lucide="check" class="w-4 h-4"></i>
+                                <span>Adicionar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+            lucide.createIcons();
+        }
+
+        function addNewCollaborator() {
+            const name = document.getElementById('newCollabName').value.trim();
+            const role = document.getElementById('newCollabRole').value.trim();
+
+            if (!name) {
+                showToast('Nome obrigatório', 'Informe o nome do colaborador.', 'bg-red-700');
+                return;
+            }
+
+            const isActive = document.getElementById('newCollabActive').value === 'true';
+            const admDateInput = document.getElementById('newCollabAdmission').value;
+            const disDateInput = document.getElementById('newCollabDismissal').value;
+
+            const cpfInput = document.getElementById('newField_CPF');
+            if (cpfInput) {
+                const cpf = cpfInput.value.replace(/\D/g, '');
+                if (cpf.length !== 11) {
+                    showToast('CPF inválido', 'O CPF deve conter exatamente 11 dígitos numéricos.', 'bg-red-700');
+                    cpfInput.focus();
+                    return;
+                }
+                cpfInput.value = cpf;
+            }
+
+            const newId = hrCollaborators.length > 0 ? Math.max(...hrCollaborators.map(c => c.id)) + 1 : 1;
+            const safeName = name.replace(/\//g, '-');
+            const path = `RH/${safeName}`;
+
+            const employeeData = {};
+            EMPLOYEE_TABLE_COLUMNS.forEach(key => {
+                const input = document.getElementById('newField_' + key);
+                employeeData[key] = input ? input.value : '';
+            });
+
+            const admissionDate = admDateInput ? admDateInput.split('-').reverse().join('/') : '';
+            const dismissalDate = disDateInput ? disDateInput.split('-').reverse().join('/') : '';
+
+            // Tenta criar no backend; em caso de falha, faz fallback para o comportamento local
+            const payload = {
+                nome: name,
+                funcao: role || employeeData["Função"] || '',
+                situacao: isActive ? 'Ativo' : 'Inativo',
+                admissao: admDateInput || undefined,
+                demissao: disDateInput || undefined,
+                matricula: employeeData['Matricula'] || undefined,
+                localizacao: employeeData['Locação'] || undefined,
+                unidade: employeeData['Unidade'] || undefined,
+                data_nasc: employeeData['Data Nascimento'] || undefined,
+                remuneracao: Number(employeeData['Remuneração'] || 0) || 0,
+                telefone: employeeData['Telefone'] || undefined,
+                rg: employeeData['RG'] || undefined,
+                cpf: employeeData['CPF'] || undefined,
+                pis: employeeData['PIS-PASEP'] || undefined,
+                sexo: employeeData['Sexo'] || undefined,
+                pai_mae: employeeData['Pai-Mãe'] || undefined,
+                titulacao: employeeData['Titulação'] || undefined,
+                curso: employeeData['Curso'] || undefined,
+                email_pessoal: employeeData['E-mail Pessoal'] || undefined,
+                email_corporativo: employeeData['E-mail Corporativo'] || undefined
+            };
+
+            apiFetch('/rh/colaboradores', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            }).then(result => {
+                const created = result.colaborador || result || {};
+                const id = created.id || newId;
+                const createdEmployeeData = {};
+                EMPLOYEE_TABLE_COLUMNS.forEach(key => {
+                    // Map back columns from payload / created record when possible
+                    switch (key) {
+                        case 'Matricula': createdEmployeeData[key] = created.matricula || payload.matricula || employeeData[key]; break;
+                        case 'Admissão': createdEmployeeData[key] = created.admissao ? created.admissao.split('-').reverse().join('/') : admissionDate; break;
+                        case 'Demissão': createdEmployeeData[key] = created.demissao ? created.demissao.split('-').reverse().join('/') : dismissalDate; break;
+                        case 'Função': createdEmployeeData[key] = created.funcao || payload.funcao || employeeData[key]; break;
+                        case 'Locação': createdEmployeeData[key] = created.localizacao || payload.localizacao || employeeData[key]; break;
+                        case 'Unidade': createdEmployeeData[key] = created.unidade || payload.unidade || employeeData[key]; break;
+                        case 'Situação': createdEmployeeData[key] = created.situacao || payload.situacao || employeeData[key]; break;
+                        case 'Data Nascimento': createdEmployeeData[key] = created.data_nasc || payload.data_nasc || employeeData[key]; break;
+                        case 'Remuneração': createdEmployeeData[key] = created.remuneracao || payload.remuneracao || employeeData[key]; break;
+                        case 'Telefone': createdEmployeeData[key] = created.telefone || payload.telefone || employeeData[key]; break;
+                        case 'RG': createdEmployeeData[key] = created.rg || payload.rg || employeeData[key]; break;
+                        case 'CPF': createdEmployeeData[key] = created.cpf || payload.cpf || employeeData[key]; break;
+                        case 'PIS-PASEP': createdEmployeeData[key] = created.pis || payload.pis || employeeData[key]; break;
+                        case 'Sexo': createdEmployeeData[key] = created.sexo || payload.sexo || employeeData[key]; break;
+                        case 'Pai-Mãe': createdEmployeeData[key] = created.pai_mae || payload.pai_mae || employeeData[key]; break;
+                        case 'Titulação': createdEmployeeData[key] = created.titulacao || payload.titulacao || employeeData[key]; break;
+                        case 'Curso': createdEmployeeData[key] = created.curso || payload.curso || employeeData[key]; break;
+                        case 'E-mail Pessoal': createdEmployeeData[key] = created.email_pessoal || payload.email_pessoal || employeeData[key]; break;
+                        case 'E-mail Corporativo': createdEmployeeData[key] = created.email_corporativo || payload.email_corporativo || employeeData[key]; break;
+                        default: createdEmployeeData[key] = employeeData[key] || '';
+                    }
+                });
+
+                const createdCollab = {
+                    id: id,
+                    name: created.nome || name,
+                    role: created.funcao || role || createdEmployeeData['Função'] || '',
+                    path: `RH/${(created.nome || name).replace(/\//g, '-')}`,
+                    active: (created.situacao || payload.situacao || 'Ativo') === 'Ativo',
+                    admissionDate: createdEmployeeData['Admissão'] || admissionDate,
+                    dismissalDate: createdEmployeeData['Demissão'] || dismissalDate,
+                    documentFolders: buildEmptyDocumentFolders(),
+                    rhMovimentacoesFolders: buildEmptyRHFolders(),
+                    employeeData: createdEmployeeData
+                };
+
+                hrCollaborators.push(createdCollab);
+                document.getElementById('addCollabModal')?.remove();
+                selectedHRCollaboratorId = id;
+                renderHRFolders();
+                renderHRDocuments(id);
+                renderEmployeeTable();
+                populateContractRecipientOptions();
+                showToast('Colaborador adicionado', `${createdCollab.name} foi cadastrado com sucesso.`, 'bg-emerald-700');
+            }).catch(err => {
+                console.error('Erro criando colaborador via API:', err);
+                showToast('Erro criando colaborador', 'Não foi possível cadastrar o colaborador no Supabase. Verifique a conexão com a API.', 'bg-red-700');
+            });
+        }
+
+        function calcAgeFromAdd(prefix) {
+            const nascInput = document.getElementById(prefix + '_Data Nascimento');
+            if (!nascInput || !nascInput.value) return;
+            const parts = nascInput.value.split('-');
+            if (parts.length !== 3) return;
+            const nasc = new Date(parts[0], parts[1] - 1, parts[2]);
+            if (isNaN(nasc.getTime())) return;
+            const hoje = new Date();
+            let idade = hoje.getFullYear() - nasc.getFullYear();
+            const mes = hoje.getMonth() - nasc.getMonth();
+            if (mes < 0 || (mes === 0 && hoje.getDate() < nasc.getDate())) idade--;
+            const diaInput = document.getElementById(prefix + '_Dia');
+            if (diaInput) diaInput.value = String(parts[2]).padStart(2, '0');
+            const mesInput = document.getElementById(prefix + '_Mês Aniversário');
+            const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+            if (mesInput) mesInput.value = meses[parseInt(parts[1]) - 1] || '';
+            const idadeInput = document.getElementById(prefix + '_Idade');
+            if (idadeInput) idadeInput.value = String(idade);
+        }
+
+        function calcAgeFromEdit(prefix) {
+            const nascInput = document.getElementById(prefix + '_Data Nascimento');
+            if (!nascInput || !nascInput.value) return;
+            const parts = nascInput.value.split('-');
+            if (parts.length !== 3) return;
+            const nasc = new Date(parts[0], parts[1] - 1, parts[2]);
+            if (isNaN(nasc.getTime())) return;
+            const hoje = new Date();
+            let idade = hoje.getFullYear() - nasc.getFullYear();
+            const mes = hoje.getMonth() - nasc.getMonth();
+            if (mes < 0 || (mes === 0 && hoje.getDate() < nasc.getDate())) idade--;
+            const diaInput = document.getElementById(prefix + '_Dia');
+            if (diaInput) diaInput.value = String(parts[2]).padStart(2, '0');
+            const mesInput = document.getElementById(prefix + '_Mês Aniversário');
+            const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+            if (mesInput) mesInput.value = meses[parseInt(parts[1]) - 1] || '';
+            const idadeInput = document.getElementById(prefix + '_Idade');
+            if (idadeInput) idadeInput.value = String(idade);
+        }
+
+        function changeCollabUnit(collabId, newUnit) {
+            const collaborator = hrCollaborators.find(c => c.id === collabId);
+            if (!collaborator || !collaborator.employeeData) return;
+            const old = collaborator.employeeData["Unidade"] || "Recife";
+            if (old === newUnit) return;
+            collaborator.employeeData["Unidade"] = newUnit;
+            renderHRFolders();
+            renderEmployeeTable();
+            showToast('Unidade alterada', `${collaborator.name}: ${old} → ${newUnit}`, 'bg-blue-700');
+        }
+
+        function toggleUnitDropdown(event, collabId) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('unitDropdown_' + collabId);
+            if (!dropdown) return;
+            const isOpen = !dropdown.classList.contains('hidden');
+            closeAllUnitDropdowns();
+            if (!isOpen) {
+                dropdown.classList.remove('hidden');
+            }
+        }
+
+        function selectUnitFromDropdown(collabId, unit) {
+            closeAllUnitDropdowns();
+            changeCollabUnit(collabId, unit);
+        }
+
+        function closeAllUnitDropdowns() {
+            document.querySelectorAll('[id^="unitDropdown_"]').forEach(el => el.classList.add('hidden'));
+        }
+
+        document.addEventListener('click', function() {
+            closeAllUnitDropdowns();
+        });
+
+        function openEditCollaboratorModal(collabId) {
+            const collaborator = hrCollaborators.find(c => c.id === collabId);
+            if (!collaborator) return;
+            const d = collaborator.employeeData || {};
+
+            const existing = document.getElementById('editCollabModal');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'editCollabModal';
+            overlay.className = 'fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+            function val(key) { return (d[key] || '').replace(/"/g, '&quot;'); }
+
+            let fieldsHtml = `
+                <div class="flex flex-col gap-1 col-span-2 md:col-span-3">
+                    <label class="text-[10px] uppercase font-semibold text-slate-500">Nome do Colaborador</label>
+                    <input type="text" id="editCollabName" value="${collaborator.name.replace(/"/g, '&quot;')}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] uppercase font-semibold text-slate-500">Cargo / Função</label>
+                    <input type="text" id="editCollabRole" value="${(collaborator.role || '').replace(/"/g, '&quot;')}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] uppercase font-semibold text-slate-500">Ativo?</label>
+                    <select id="editCollabActive" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        <option value="true" ${collaborator.active ? 'selected' : ''}>Sim</option>
+                        <option value="false" ${!collaborator.active ? 'selected' : ''}>Não</option>
+                    </select>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] uppercase font-semibold text-slate-500">Data Admissão</label>
+                    <input type="date" id="editCollabAdmission" value="${collaborator.admissionDate ? collaborator.admissionDate.split('/').reverse().join('-') : ''}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] uppercase font-semibold text-slate-500">Data Demissão</label>
+                    <input type="date" id="editCollabDismissal" value="${collaborator.dismissalDate ? collaborator.dismissalDate.split('/').reverse().join('-') : ''}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                </div>
+            `;
+
+            EMPLOYEE_TABLE_COLUMNS.forEach(key => {
+                if (key === 'Locação') {
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key}</label>
+                            <select id="editField_${key}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                                <option value="Professor" ${val(key) === 'Professor' ? 'selected' : ''}>Professor</option>
+                                <option value="Administrativo" ${val(key) === 'Administrativo' ? 'selected' : ''}>Administrativo</option>
+                            </select>
+                        </div>`;
+                } else if (key === 'CPF') {
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key} <span class="text-red-500">*</span></label>
+                            <input type="text" id="editField_${key}" value="${val(key)}" maxlength="11" pattern="[0-9]{11}" required placeholder="00000000000" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        </div>`;
+                } else if (key === 'Matricula') {
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key}</label>
+                            <input type="text" id="editField_${key}" value="${val(key)}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-slate-100">
+                        </div>`;
+                } else if (key === 'Data Nascimento') {
+                    const nascVal = val(key);
+                    const nascDate = nascVal ? nascVal.split('/').reverse().join('-') : '';
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key}</label>
+                            <input type="date" id="editField_${key}" value="${nascDate}" onchange="calcAgeFromEdit('editField')" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        </div>`;
+                } else if (key === 'Idade' || key === 'Dia' || key === 'Mês Aniversário') {
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key}</label>
+                            <input type="text" id="editField_${key}" value="${val(key)}" readonly class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 text-slate-500">
+                        </div>`;
+                } else {
+                    fieldsHtml += `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] uppercase font-semibold text-slate-500">${key}</label>
+                            <input type="text" id="editField_${key}" value="${val(key)}" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                        </div>`;
+                }
+            });
+
+            overlay.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-blue-50 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-100 p-2 rounded-lg">
+                                <i data-lucide="pencil" class="w-5 h-5 text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Editar Colaborador — ${collaborator.name}</h3>
+                                <p class="text-xs text-slate-500">Altere os dados cadastrais, vínculo e informações da planilha.</p>
+                            </div>
+                        </div>
+                        <button onclick="this.closest('#editCollabModal').remove()" class="text-slate-500 hover:text-slate-900 rounded-full p-1.5 hover:bg-slate-200 transition">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="overflow-y-auto p-6">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            ${fieldsHtml}
+                        </div>
+                    </div>
+                    <div class="px-6 py-4 border-t border-slate-200 bg-blue-50 flex items-center justify-between shrink-0">
+                        <span class="text-xs text-slate-400">CPF deve conter exatamente 11 dígitos.</span>
+                        <div class="flex gap-2">
+                            <button onclick="document.getElementById('editCollabModal').remove()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2 rounded-xl text-sm font-semibold transition">Cancelar</button>
+                            <button onclick="saveEditCollaborator(${collabId})" class="bg-blue-900 hover:bg-blue-800 text-white px-5 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-1">
+                                <i data-lucide="check" class="w-4 h-4"></i>
+                                <span>Salvar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+            lucide.createIcons();
+        }
+
+        function saveEditCollaborator(collabId) {
+            const collaborator = hrCollaborators.find(c => c.id === collabId);
+            if (!collaborator) return;
+
+            const name = document.getElementById('editCollabName').value.trim();
+            if (!name) { showToast('Nome obrigatório', 'Informe o nome do colaborador.', 'bg-red-700'); return; }
+
+            const cpfInput = document.getElementById('editField_CPF');
+            if (cpfInput) {
+                const cpf = cpfInput.value.replace(/\D/g, '');
+                if (cpf.length !== 11) {
+                    showToast('CPF inválido', 'O CPF deve conter exatamente 11 dígitos numéricos.', 'bg-red-700');
+                    cpfInput.focus();
+                    return;
+                }
+                cpfInput.value = cpf;
+            }
+
+            collaborator.name = name;
+            collaborator.role = document.getElementById('editCollabRole').value.trim();
+            collaborator.active = document.getElementById('editCollabActive').value === 'true';
+
+            const admVal = document.getElementById('editCollabAdmission').value;
+            collaborator.admissionDate = admVal ? admVal.split('-').reverse().join('/') : '';
+            const disVal = document.getElementById('editCollabDismissal').value;
+            collaborator.dismissalDate = disVal ? disVal.split('-').reverse().join('/') : '';
+
+            const safeName = name.replace(/\//g, '-');
+            collaborator.path = `RH/${safeName}`;
+
+            EMPLOYEE_TABLE_COLUMNS.forEach(key => {
+                const input = document.getElementById('editField_' + key);
+                if (input) {
+                    collaborator.employeeData[key] = input.value;
+                }
+            });
+
+            document.getElementById('editCollabModal')?.remove();
+            selectedHRCollaboratorId = collabId;
+            renderHRFolders();
+            renderHRDocuments(collabId);
+            renderEmployeeTable();
+            populateContractRecipientOptions();
+            showToast('Colaborador atualizado', `Dados de ${name} salvos com sucesso.`, 'bg-green-700');
+        }
+
+        function updateAdmissionDate() {
+            const input = document.getElementById('hrAdmissionDate');
+            const collaborator = hrCollaborators.find(c => c.id === selectedHRCollaboratorId);
+            if (!collaborator || !input.value) return;
+            const parts = input.value.split('-');
+            collaborator.admissionDate = parts[2] + '/' + parts[1] + '/' + parts[0];
+            if (collaborator.employeeData) collaborator.employeeData["Admissão"] = collaborator.admissionDate;
+            renderEmployeeTable();
+            showToast('Data de Admissão', `Atualizada para ${collaborator.admissionDate}`, 'bg-blue-700');
+        }
+
+        function updateDismissalDate() {
+            const input = document.getElementById('hrDismissalDate');
+            const collaborator = hrCollaborators.find(c => c.id === selectedHRCollaboratorId);
+            if (!collaborator || !input.value) {
+                if (collaborator) {
+                    collaborator.dismissalDate = '';
+                    if (collaborator.employeeData) collaborator.employeeData["Demissão"] = '';
+                    renderEmployeeTable();
+                }
+                return;
+            }
+            const parts = input.value.split('-');
+            collaborator.dismissalDate = parts[2] + '/' + parts[1] + '/' + parts[0];
+            if (collaborator.employeeData) collaborator.employeeData["Demissão"] = collaborator.dismissalDate;
+            renderEmployeeTable();
+            showToast('Data de Demissão', `Atualizada para ${collaborator.dismissalDate}`, 'bg-blue-700');
+        }
+
+        function exportEmployeeTableExcel() {
+            const visibleCollaborators = hrCollaborators.filter(c => {
+                const filterValue = document.getElementById('hrEmployeeTableFilter')?.value.toLowerCase() || '';
+                const searchText = (c.name + ' ' + Object.values(c.employeeData || {}).join(' ')).toLowerCase();
+                return searchText.includes(filterValue);
+            });
+
+            if (visibleCollaborators.length === 0) {
+                showToast('Sem dados', 'Nenhum funcionário para exportar.', 'bg-red-700');
+                return;
+            }
+
+            // Build HTML table for export (Excel can open HTML tables)
+            let html = '<html><head><meta charset="UTF-8"><title>Funcionarios</title></head><body>';
+            html += '<table border="1" cellpadding="4" cellspacing="0" style="font-family:Arial;font-size:11px;">';
+            html += '<thead><tr style="background:#1e3a5f;color:white;">';
+            html += '<th>Colaborador</th>';
+            EMPLOYEE_TABLE_COLUMNS.forEach(col => {
+                html += `<th>${col}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            visibleCollaborators.forEach(c => {
+                const d = c.employeeData || {};
+                html += '<tr>';
+                html += `<td style="font-weight:bold;">${c.name}</td>`;
+                EMPLOYEE_TABLE_COLUMNS.forEach(col => {
+                    html += `<td>${d[col] || ''}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            const totalRow = `<p style="margin-top:10px;font-family:Arial;font-size:11px;"><strong>Quantidade de funcionários: ${visibleCollaborators.length}</strong></p>`;
+            html += totalRow;
+            html += '</body></html>';
+
+            const blob = new Blob(['\ufeff' + html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'funcionarios_rh.xls';
+            link.click();
+            showToast('Exportação concluída', `Planilha gerada com ${visibleCollaborators.length} funcionário(s).`, 'bg-green-700');
+        }
+
+        function updateContractFileName() {
+            const input = document.getElementById('contractFileInput');
+            const label = document.getElementById('contractUploadName');
+            label.innerText = input.files.length > 0 ? `Arquivo selecionado: ${input.files[0].name}` : '';
+        }
+
+        function sendHRContract() {
+            const collaboratorId = parseInt(document.getElementById('contractCollaborator').value, 10);
+            const type = document.getElementById('contractType').value.trim() || 'Contrato';
+            const note = document.getElementById('contractNote').value.trim();
+            const fileInput = document.getElementById('contractFileInput');
+            const collaborator = hrCollaborators.find(item => item.id === collaboratorId);
+            if (!collaborator || fileInput.files.length === 0) {
+                showToast('Envio não concluído', 'Selecione colaborador e arquivo de contrato.', 'bg-red-700');
+                return;
+            }
+            const recipients = contractRecipientsTemp.map((r, idx) => ({
+                email: r.email, order: idx + 1, status: 'Pendente'
+            }));
+            const docMeta = {
+                name: fileInput.files[0].name,
+                type: type,
+                status: recipients.length > 0 ? 'Pendente Assinatura' : 'Enviado',
+                date: new Date().toLocaleDateString('pt-BR'),
+                note: note,
+                emails: recipients,
+                currentSignerIndex: 0,
+                signed: false
+            };
+            collaborator.documentFolders["CONTRATOS E REGISTROS"].files.push({
+                name: docMeta.name,
+                uploadedAt: docMeta.date,
+                size: Math.round(fileInput.files[0].size / 1024) + ' KB',
+                status: docMeta.status,
+                type: docMeta.type,
+                note: docMeta.note,
+                recipients: docMeta.emails,
+                signed: false,
+                signedAt: null
+            });
+            showToast('Contrato Enviado', `Contrato direcionado para a pasta de ${collaborator.name}. Os destinatários receberão por e‑mail para assinatura.`);
+            renderHRFolders();
+            renderHRDocuments(collaboratorId);
+            document.getElementById('contractType').value = '';
+            document.getElementById('contractNote').value = '';
+            fileInput.value = '';
+            document.getElementById('contractUploadName').innerText = '';
+            document.getElementById('contractRecipientEmail').value = '';
+            contractRecipientsTemp = [];
+            renderContractRecipients();
+        }
+
+        function openAdmissionModal(collaboratorId) {
+            const collaborator = hrCollaborators.find(c => c.id === collaboratorId);
+            if (!collaborator) return;
+
+            const existing = document.getElementById('admissionModal');
+            if (existing) existing.remove();
+
+            const totalFiles = Object.values(collaborator.documentFolders).reduce((sum, f) => sum + f.files.length, 0);
+
+            const overlay = document.createElement('div');
+            overlay.id = 'admissionModal';
+            overlay.className = 'fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+            let bodyHtml = '';
+            DOCUMENT_CATEGORIES.forEach((cat, idx) => {
+                const folder = collaborator.documentFolders[cat];
+                if (!folder) return;
+                const fileCount = folder.files.length;
+
+                let filesHtml = '';
+                if (fileCount === 0) {
+                    filesHtml = '<span class="text-xs text-slate-400 italic">Nenhum arquivo</span>';
+                } else {
+                    filesHtml = folder.files.map((f, fi) => `
+                        <div class="flex items-center gap-2 text-xs text-slate-700">
+                            <i data-lucide="file" class="w-3.5 h-3.5 text-blue-600 shrink-0"></i>
+                            <span class="font-medium truncate max-w-[160px]">${f.name}</span>
+                            <span class="text-slate-400">(${f.size})</span>
+                            <span class="text-slate-400">— ${f.uploadedAt}</span>
+                            <button onclick="viewDocFile(${collaboratorId},'${cat.replace(/'/g, "\\'")}',${fi})" class="text-slate-600 hover:text-blue-700 p-0.5" title="Visualizar">
+                                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="printDocFile(${collaboratorId},'${cat.replace(/'/g, "\\'")}',${fi})" class="text-slate-600 hover:text-green-700 p-0.5" title="Imprimir">
+                                <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="editDocFile(${collaboratorId},'${cat.replace(/'/g, "\\'")}',${fi})" class="text-blue-600 hover:text-blue-800 p-0.5" title="Substituir">
+                                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="deleteDocFile(${collaboratorId},'${cat.replace(/'/g, "\\'")}',${fi}); document.getElementById('admissionModal')?.remove()" class="text-red-600 hover:text-red-800 p-0.5" title="Excluir">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                }
+
+                const isEven = idx % 2 === 0;
+                bodyHtml += `
+                    <div class="flex items-center justify-between px-4 py-3 ${isEven ? 'bg-white' : 'bg-slate-50/50'} border-b border-slate-100 last:border-b-0 hover:bg-blue-50/30 transition">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-800 uppercase">${idx+1}. ${cat}</span>
+                                ${fileCount > 0 ? `<span class="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold">${fileCount}</span>` : ''}
+                            </div>
+                            <div class="mt-1 space-y-1">${filesHtml}</div>
+                        </div>
+                        <div class="shrink-0 ml-3">
+                            <button onclick="uploadDocFile(${collaboratorId},'${cat.replace(/'/g, "\\'")}')" class="text-xs bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1">
+                                <i data-lucide="upload" class="w-3 h-3"></i>
+                                <span>Upload</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            overlay.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-indigo-100 p-2 rounded-lg">
+                                <i data-lucide="folder-open" class="w-6 h-6 text-indigo-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Documentos Admissão — ${collaborator.name}</h3>
+                                <p class="text-xs text-slate-500">${totalFiles} arquivo(s) em ${DOCUMENT_CATEGORIES.length} categorias</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="generateExternalLink(${collaboratorId})" class="text-xs bg-green-100 text-green-700 hover:bg-green-200 px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1">
+                                <i data-lucide="link" class="w-3.5 h-3.5"></i>
+                                <span>Link Externo</span>
+                            </button>
+                            <button onclick="this.closest('#admissionModal').remove()" class="text-slate-500 hover:text-slate-900 rounded-full p-1.5 hover:bg-slate-200 transition">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-y-auto">${bodyHtml}</div>
+                    <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-between items-center shrink-0">
+                        <span class="text-xs text-slate-500">Clique em <strong>Upload</strong> para adicionar arquivos a cada categoria.</span>
+                        <button onclick="document.getElementById('admissionModal').remove()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2 rounded-xl text-sm font-semibold transition">Fechar</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+            lucide.createIcons();
+        }
+
+        function openRHMovimentacoesModal(collaboratorId) {
+            const collaborator = hrCollaborators.find(c => c.id === collaboratorId);
+            if (!collaborator) return;
+
+            const existing = document.getElementById('rhMovModal');
+            if (existing) existing.remove();
+
+            const totalFiles = Object.values(collaborator.rhMovimentacoesFolders || {}).reduce((sum, f) => sum + f.files.length, 0);
+
+            const overlay = document.createElement('div');
+            overlay.id = 'rhMovModal';
+            overlay.className = 'fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+            let bodyHtml = '';
+            RH_MOVIMENTACOES_CATEGORIES.forEach((cat, idx) => {
+                const folder = (collaborator.rhMovimentacoesFolders || {})[cat];
+                if (!folder) return;
+                const fileCount = folder.files.length;
+
+                let filesHtml = '';
+                if (fileCount === 0) {
+                    filesHtml = '<span class="text-xs text-slate-400 italic">Nenhum arquivo</span>';
+                } else {
+                    filesHtml = folder.files.map((f, fi) => `
+                        <div class="flex items-center gap-2 text-xs text-slate-700">
+                            <i data-lucide="file" class="w-3.5 h-3.5 text-amber-600 shrink-0"></i>
+                            <span class="font-medium truncate max-w-[160px]">${f.name}</span>
+                            <span class="text-slate-400">(${f.size})</span>
+                            <span class="text-slate-400">— ${f.uploadedAt}</span>
+                            <button onclick="viewDocFile(${collaboratorId},'${cat.replace(/'/g, "\\'")}',${fi})" class="text-slate-600 hover:text-blue-700 p-0.5" title="Visualizar">
+                                <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="printDocFile(${collaboratorId},'${cat.replace(/'/g, "\\'")}',${fi})" class="text-slate-600 hover:text-green-700 p-0.5" title="Imprimir">
+                                <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="editRHMovDocFile(${collaboratorId},'${cat.replace(/'/g, "\\'")}',${fi})" class="text-blue-600 hover:text-blue-800 p-0.5" title="Substituir">
+                                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="deleteRHMovDocFile(${collaboratorId},'${cat.replace(/'/g, "\\'")}',${fi}); document.getElementById('rhMovModal')?.remove()" class="text-red-600 hover:text-red-800 p-0.5" title="Excluir">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                }
+
+                const isEven = idx % 2 === 0;
+                bodyHtml += `
+                    <div class="flex items-center justify-between px-4 py-3 ${isEven ? 'bg-white' : 'bg-amber-50/30'} border-b border-slate-100 last:border-b-0 hover:bg-amber-50/50 transition">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-800 uppercase">${idx+1}. ${cat}</span>
+                                ${fileCount > 0 ? `<span class="text-xs bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-semibold">${fileCount}</span>` : ''}
+                            </div>
+                            <div class="mt-1 space-y-1">${filesHtml}</div>
+                        </div>
+                        <div class="shrink-0 ml-3">
+                            <button onclick="uploadRHMovDocFile(${collaboratorId},'${cat.replace(/'/g, "\\'")}')" class="text-xs bg-amber-100 text-amber-700 hover:bg-amber-200 px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1">
+                                <i data-lucide="upload" class="w-3 h-3"></i>
+                                <span>Upload</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            overlay.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-amber-50 shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-amber-100 p-2 rounded-lg">
+                                <i data-lucide="activity" class="w-6 h-6 text-amber-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Movimentações RH — ${collaborator.name}</h3>
+                                <p class="text-xs text-slate-500">${totalFiles} arquivo(s) em ${RH_MOVIMENTACOES_CATEGORIES.length} categorias</p>
+                            </div>
+                        </div>
+                        <button onclick="this.closest('#rhMovModal').remove()" class="text-slate-500 hover:text-slate-900 rounded-full p-1.5 hover:bg-slate-200 transition">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="overflow-y-auto">${bodyHtml}</div>
+                    <div class="px-6 py-4 border-t border-slate-200 bg-amber-50 flex justify-between items-center shrink-0">
+                        <span class="text-xs text-slate-500">Clique em <strong>Upload</strong> para adicionar arquivos. Múltiplos arquivos por categoria são permitidos.</span>
+                        <button onclick="document.getElementById('rhMovModal').remove()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2 rounded-xl text-sm font-semibold transition">Fechar</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+            lucide.createIcons();
+        }
+
+        function uploadRHMovDocFile(collaboratorId, categoryKey) {
+            const collaborator = hrCollaborators.find(c => c.id === collaboratorId);
+            if (!collaborator) return;
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.pdf,.jpg,.jpeg,.png,.doc,.docx';
+            input.onchange = async function(e) {
+                if (input.files.length === 0) return;
+                const file = input.files[0];
+                const sizeKB = Math.round(file.size / 1024);
+                const sizeStr = sizeKB > 1024 ? (sizeKB / 1024).toFixed(1) + ' MB' : sizeKB + ' KB';
+                const form = new FormData();
+                form.append('file', file);
+                form.append('categoria', categoryKey);
+                form.append('tamanho', sizeStr);
+                form.append('tipo', file.type || '');
+                form.append('observacao', '');
+
+                try {
+                    const token = localStorage.getItem('gedUserToken');
+                    const res = await fetch(`${API_BASE}/rh/colaboradores/${collaboratorId}/documentos/upload`, {
+                        method: 'POST',
+                        headers: {
+                            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                        },
+                        credentials: 'same-origin',
+                        body: form
+                    });
+                    if (!res.ok) {
+                        const text = await res.text();
+                        throw new Error(text || 'Erro no upload');
+                    }
+                    await loadCollaboratorDocuments(collaboratorId);
+                    openRHMovimentacoesModal(collaboratorId);
+                    showToast('Arquivo enviado', `${file.name} adicionado em "${categoryKey}".`, 'bg-green-700');
+                } catch (err) {
+                    console.error('Erro ao enviar documento de RH:', err);
+                    showToast('Erro ao enviar arquivo', 'Não foi possível salvar o documento no servidor.', 'bg-red-700');
+                }
+            };
+            input.click();
+        }
+
+        function editRHMovDocFile(collaboratorId, categoryKey, fileIndex) {
+            const collaborator = hrCollaborators.find(c => c.id === collaboratorId);
+            if (!collaborator) return;
+            const folder = (collaborator.rhMovimentacoesFolders || {})[categoryKey];
+            if (!folder || !folder.files[fileIndex]) return;
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.pdf,.jpg,.jpeg,.png,.doc,.docx';
+            input.onchange = function(e) {
+                if (input.files.length === 0) return;
+                const file = input.files[0];
+                const sizeKB = Math.round(file.size / 1024);
+                const sizeStr = sizeKB > 1024 ? (sizeKB / 1024).toFixed(1) + ' MB' : sizeKB + ' KB';
+                folder.files[fileIndex] = {
+                    name: file.name,
+                    uploadedAt: new Date().toLocaleDateString('pt-BR'),
+                    size: sizeStr
+                };
+                openRHMovimentacoesModal(collaboratorId);
+                showToast('Arquivo substituído', `${file.name} atualizado em "${categoryKey}".`, 'bg-blue-700');
+            };
+            input.click();
+        }
+
+        function deleteRHMovDocFile(collaboratorId, categoryKey, fileIndex) {
+            const collaborator = hrCollaborators.find(c => c.id === collaboratorId);
+            if (!collaborator) return;
+            const folder = (collaborator.rhMovimentacoesFolders || {})[categoryKey];
+            if (!folder || !folder.files[fileIndex]) return;
+            const fileName = folder.files[fileIndex].name;
+            if (!confirm(`Excluir "${fileName}" de "${categoryKey}"?`)) return;
+            folder.files.splice(fileIndex, 1);
+            openRHMovimentacoesModal(collaboratorId);
+            showToast('Arquivo excluído', `${fileName} removido de "${categoryKey}".`, 'bg-red-700');
+        }
+
+        function generateExternalLink(collaboratorId) {
+            const collaborator = hrCollaborators.find(c => c.id === collaboratorId);
+            if (!collaborator) return;
+            const token = 'ADM-' + collaborator.id.toString().padStart(3, '0') + '-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            const link = `https://portal.novaroma.com.br/admissao/${token}`;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(link).catch(() => {});
+            }
+            const existing = document.getElementById('externalLinkModal');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.id = 'externalLinkModal';
+            overlay.className = 'fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+            overlay.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden">
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="link" class="w-5 h-5 text-green-600"></i>
+                            <h3 class="text-lg font-bold text-slate-900">Link Externo — ${collaborator.name}</h3>
+                        </div>
+                        <button onclick="this.closest('#externalLinkModal').remove()" class="text-slate-500 hover:text-slate-900 rounded-full p-1">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-sm text-slate-600">Compartilhe este link com o colaborador para que ele próprio faça o upload dos documentos de admissão.</p>
+                        <div class="flex items-center gap-2">
+                            <input type="text" readonly value="${link}" class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-sm bg-slate-50 text-slate-900 font-mono select-all focus:outline-none" onclick="this.select()">
+                            <button onclick="navigator.clipboard.writeText('${link}'); showToast('Link copiado!', 'Link externo copiado para a área de transferência.', 'bg-green-700');" class="bg-blue-900 hover:bg-blue-800 text-white px-4 py-3 rounded-xl text-sm font-semibold transition flex items-center gap-1">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                <span>Copiar</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-400">Token: <span class="font-mono font-semibold">${token}</span> — válido por 7 dias.</p>
+                    </div>
+                    <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+                        <button onclick="this.closest('#externalLinkModal').remove()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2 rounded-xl text-sm font-semibold transition">Fechar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            lucide.createIcons();
+            showToast('Link gerado!', `Link externo para ${collaborator.name} copiado para área de transferência.`, 'bg-green-700');
+        }
+
+        function getDocFile(collaboratorId, categoryKey, fileIndex) {
+            const c = hrCollaborators.find(x => x.id === collaboratorId);
+            if (!c) return null;
+            let f = (c.documentFolders || {})[categoryKey];
+            if (!f) f = (c.rhMovimentacoesFolders || {})[categoryKey];
+            return f ? f.files[fileIndex] : null;
+        }
+
+        function getDocCategoryLabel(collaboratorId, categoryKey) {
+            if (DOCUMENT_CATEGORIES.includes(categoryKey)) return 'Documentos Admissão';
+            if (RH_MOVIMENTACOES_CATEGORIES.includes(categoryKey)) return 'Movimentações RH';
+            return '';
+        }
+
+        function viewDocFile(collaboratorId, categoryKey, fileIndex) {
+            const file = getDocFile(collaboratorId, categoryKey, fileIndex);
+            const collaborator = hrCollaborators.find(c => c.id === collaboratorId);
+            if (!file || !collaborator) return;
+
+            const folderLabel = getDocCategoryLabel(collaboratorId, categoryKey);
+            const existing = document.getElementById('docPreviewModal');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'docPreviewModal';
+            overlay.className = 'fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-center justify-center p-4';
+            overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+            overlay.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden">
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-blue-100 p-2 rounded-lg">
+                                <i data-lucide="file-text" class="w-6 h-6 text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">${file.name}</h3>
+                                <p class="text-xs text-slate-500">${folderLabel} — ${collaborator.name}</p>
+                            </div>
+                        </div>
+                        <button onclick="this.closest('#docPreviewModal').remove()" class="text-slate-500 hover:text-slate-900 rounded-full p-1.5 hover:bg-slate-200 transition">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="p-6 space-y-5">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                                <p class="text-xs uppercase text-slate-500 font-semibold">Nome do arquivo</p>
+                                <p class="mt-1 font-medium text-slate-900 break-all">${file.name}</p>
+                            </div>
+                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                                <p class="text-xs uppercase text-slate-500 font-semibold">Tamanho</p>
+                                <p class="mt-1 font-medium text-slate-900">${file.size}</p>
+                            </div>
+                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                                <p class="text-xs uppercase text-slate-500 font-semibold">Data de upload</p>
+                                <p class="mt-1 font-medium text-slate-900">${file.uploadedAt}</p>
+                            </div>
+                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                                <p class="text-xs uppercase text-slate-500 font-semibold">Categoria</p>
+                                <p class="mt-1 font-medium text-slate-900">${categoryKey}</p>
+                            </div>
+                        </div>
+                        <div class="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-100 p-12 text-center">
+                            <i data-lucide="file-text" class="mx-auto w-16 h-16 text-slate-400 mb-3"></i>
+                            <p class="text-base font-semibold text-slate-700">Pré-visualização do documento</p>
+                            <p class="mt-2 text-sm text-slate-500">${file.name}</p>
+                            <p class="text-xs text-slate-400 mt-1">${file.size} • enviado em ${file.uploadedAt}</p>
+                            <div class="flex items-center justify-center gap-3 mt-5">
+                                <button onclick="printDocFile(${collaboratorId},'${categoryKey.replace(/'/g, "\\'")}',${fileIndex})" class="bg-blue-900 hover:bg-blue-800 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+                                    <i data-lucide="printer" class="w-4 h-4"></i>
+                                    <span>Imprimir</span>
+                                </button>
+                                <button onclick="this.closest('#docPreviewModal').remove()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition">Fechar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+            lucide.createIcons();
+        }
+
+        function printDocFile(collaboratorId, categoryKey, fileIndex) {
+            const file = getDocFile(collaboratorId, categoryKey, fileIndex);
+            const collaborator = hrCollaborators.find(c => c.id === collaboratorId);
+            if (!file || !collaborator) return;
+
+            const folderLabel = getDocCategoryLabel(collaboratorId, categoryKey);
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            printWindow.document.write(`
+                <html><head><title>${file.name}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 40px; color: #222; }
+                    h1 { font-size: 22px; margin-bottom: 5px; }
+                    .meta { color: #666; font-size: 13px; margin-bottom: 30px; }
+                    .info { background: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+                    .info p { margin: 5px 0; font-size: 14px; }
+                    .info strong { color: #333; }
+                    .footer { margin-top: 40px; font-size: 12px; color: #999; border-top: 1px solid #ddd; padding-top: 15px; }
+                    .doc-icon { font-size: 48px; text-align: center; margin: 30px 0; color: #888; }
+                </style>
+                </head><body>
+                    <h1>${file.name}</h1>
+                    <p class="meta">${folderLabel} — ${collaborator.name}</p>
+                    <div class="doc-icon">📄</div>
+                    <div class="info">
+                        <p><strong>Nome:</strong> ${file.name}</p>
+                        <p><strong>Tamanho:</strong> ${file.size}</p>
+                        <p><strong>Data de upload:</strong> ${file.uploadedAt}</p>
+                        <p><strong>Categoria:</strong> ${categoryKey}</p>
+                        <p><strong>Colaborador:</strong> ${collaborator.name} (${collaborator.role})</p>
+                    </div>
+                    <p style="text-align:center;color:#666;">--- Fim do documento ---</p>
+                    <div class="footer">
+                        Documento impresso do GED Faculdade Nova Roma em ${new Date().toLocaleString('pt-BR')}
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); window.close(); };
+                    <\\/script>
+                </body></html>
+            `);
+            printWindow.document.close();
+        }
+
+        function showToast(title, msg, bgColor = 'bg-gray-900') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMsg').innerText = msg;
+            toast.className = `fixed bottom-5 right-5 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transform opacity-100 translate-y-0 transition duration-300 pointer-events-auto z-50 ${bgColor}`;
+            setTimeout(() => {
+                toast.classList.replace('opacity-100', 'opacity-0');
+                toast.classList.add('translate-y-20');
+            }, 4000);
+        }
+
+        // Carrega colaboradores do backend e converte para a estrutura esperada pelo frontend
+        async function loadHRCollaborators() {
+            hrCollaborators.length = 0; // limpa amostras estáticas antes de carregar do backend
+            try {
+                const res = await apiFetch('/rh/colaboradores');
+                const items = (res && res.colaboradores) ? res.colaboradores : (res && Array.isArray(res) ? res : []);
+                if (!Array.isArray(items)) return;
+                items.forEach(col => {
+                    const emp = {};
+                    EMPLOYEE_TABLE_COLUMNS.forEach(key => {
+                        switch (key) {
+                            case 'Matricula': emp[key] = col.matricula || '' ; break;
+                            case 'Admissão': emp[key] = col.admissao ? col.admissao.split('-').reverse().join('/') : (col.admissao || ''); break;
+                            case 'Demissão': emp[key] = col.demissao ? col.demissao.split('-').reverse().join('/') : (col.demissao || ''); break;
+                            case 'Função': emp[key] = col.funcao || '' ; break;
+                            case 'Locação': emp[key] = col.localizacao || '' ; break;
+                            case 'Unidade': emp[key] = col.unidade || '' ; break;
+                            case 'Situação': emp[key] = col.situacao || '' ; break;
+                            case 'Data Nascimento': emp[key] = col.data_nasc || '' ; break;
+                            case 'Remuneração': emp[key] = col.remuneracao || '' ; break;
+                            case 'Telefone': emp[key] = col.telefone || '' ; break;
+                            case 'RG': emp[key] = col.rg || '' ; break;
+                            case 'CPF': emp[key] = col.cpf || '' ; break;
+                            case 'PIS-PASEP': emp[key] = col.pis || '' ; break;
+                            case 'Sexo': emp[key] = col.sexo || '' ; break;
+                            case 'Pai-Mãe': emp[key] = col.pai_mae || '' ; break;
+                            case 'Titulação': emp[key] = col.titulacao || '' ; break;
+                            case 'Curso': emp[key] = col.curso || '' ; break;
+                            case 'E-mail Pessoal': emp[key] = col.email_pessoal || '' ; break;
+                            case 'E-mail Corporativo': emp[key] = col.email_corporativo || '' ; break;
+                            default: emp[key] = '';
+                        }
+                    });
+                    hrCollaborators.push({
+                        id: col.id,
+                        name: col.nome || '',
+                        role: col.funcao || emp['Função'] || '',
+                        path: `RH/${(col.nome || '').replace(/\//g, '-')}`,
+                        active: (col.situacao || '').toLowerCase() === 'ativo' || (col.situacao || '') === 'Ativo',
+                        admissionDate: emp['Admissão'] || '',
+                        dismissalDate: emp['Demissão'] || '',
+                        documentFolders: buildEmptyDocumentFolders(),
+                        rhMovimentacoesFolders: buildEmptyRHFolders(),
+                        employeeData: emp
+                    });
+                });
+            } catch (err) {
+                console.error('Erro carregando colaboradores do backend:', err);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!checkPermission()) return;
+            highlightActiveTab();
+            // Carrega colaboradores do backend antes de renderizar a UI
+            loadHRCollaborators().finally(() => {
+                renderHRFolders();
+                if (hrCollaborators.length > 0) {
+                    selectedHRCollaboratorId = hrCollaborators[0].id;
+                }
+                if (selectedHRCollaboratorId) {
+                    loadCollaboratorDocuments(selectedHRCollaboratorId).finally(() => {
+                        renderHRDocuments(selectedHRCollaboratorId);
+                        populateContractRecipientOptions();
+                        // Abre a aba correta a partir do parâmetro ?tab= na URL (compatível com sidebar)
+                        const params = new URLSearchParams(window.location.search);
+                        const tabParam = (params.get('tab') || '').toLowerCase();
+                        if (tabParam.includes('envio')) {
+                            setActiveHRTab('envio');
+                        } else if (tabParam.includes('tabela')) {
+                            setActiveHRTab('tabela');
+                        } else if (tabParam.includes('ferias') || tabParam.includes('férias')) {
+                            setActiveHRTab('ferias');
+                        } else {
+                            setActiveHRTab('colaboradores');
+                        }
+                    });
+                } else {
+                    renderHRDocuments(selectedHRCollaboratorId);
+                    populateContractRecipientOptions();
+                    const params = new URLSearchParams(window.location.search);
+                    const tabParam = (params.get('tab') || '').toLowerCase();
+                    if (tabParam.includes('envio')) {
+                        setActiveHRTab('envio');
+                    } else if (tabParam.includes('tabela')) {
+                        setActiveHRTab('tabela');
+                    } else if (tabParam.includes('ferias') || tabParam.includes('férias')) {
+                        setActiveHRTab('ferias');
+                    } else {
+                        setActiveHRTab('colaboradores');
+                    }
+                }
+                setHRFilterStatus('todos');
+                lucide.createIcons();
+            });
+        });
+    </script>
+    <script>window.addEventListener('DOMContentLoaded', loadSidebar);</script>
+</body>
+</html>

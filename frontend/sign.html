@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assinatura Eletrônica</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide/dist/lucide.min.js"></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+    <main class="max-w-4xl mx-auto py-10 px-4">
+        <section class="rounded-[2rem] bg-white shadow-lg p-8 space-y-6">
+            <div class="space-y-3">
+                <div class="flex items-center gap-3 text-blue-900">
+                    <i data-lucide="shield-check" class="w-8 h-8"></i>
+                    <div>
+                        <h1 class="text-3xl font-bold">Assinatura Eletrônica</h1>
+                        <p class="text-sm text-slate-500">Preencha os dados do signatário e registre a assinatura no final do documento.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="docInfo" class="rounded-3xl border border-slate-200 bg-slate-50 p-5 space-y-2">
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Documento</p>
+                <h2 id="docTitle" class="text-xl font-semibold text-slate-900"></h2>
+                <p id="docMeta" class="text-sm text-slate-600"></p>
+                <p id="docStatus" class="text-sm font-medium text-orange-700"></p>
+            </div>
+
+            <div id="formContainer" class="space-y-6">
+                <form id="signatureForm" class="grid gap-4">
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <label class="space-y-2">
+                            <span class="text-sm font-medium text-slate-700">Nome completo</span>
+                            <input id="signerName" type="text" required class="w-full rounded-3xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                        </label>
+                        <label class="space-y-2">
+                            <span class="text-sm font-medium text-slate-700">CPF</span>
+                            <input id="signerCPF" type="text" required class="w-full rounded-3xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" placeholder="000.000.000-00" />
+                        </label>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <label class="space-y-2">
+                            <span class="text-sm font-medium text-slate-700">Função</span>
+                            <input id="signerRole" type="text" required class="w-full rounded-3xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" placeholder="Ex: Gestor Financeiro" />
+                        </label>
+                        <label class="space-y-2">
+                            <span class="text-sm font-medium text-slate-700">Local</span>
+                            <input id="signerLocation" type="text" required class="w-full rounded-3xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" placeholder="Cidade / Unidade" />
+                        </label>
+                    </div>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <label class="space-y-2">
+                            <span class="text-sm font-medium text-slate-700">Data e Hora</span>
+                            <input id="signerDateTime" type="datetime-local" required class="w-full rounded-3xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                        </label>
+                    </div>
+                    <button type="submit" class="inline-flex items-center justify-center rounded-3xl bg-blue-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800">
+                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+                        Assinar e Arquivar
+                    </button>
+                </form>
+            </div>
+
+            <div id="signedBlock" class="hidden rounded-3xl border border-green-200 bg-green-50 p-5 space-y-3">
+                <p class="text-sm font-semibold text-green-900">Assinatura registrada com sucesso!</p>
+                <p class="text-sm text-slate-700" id="signedMessage"></p>
+                <button id="backToGed" class="inline-flex items-center rounded-3xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100">
+                    Voltar para GED
+                </button>
+            </div>
+
+            <div id="errorBlock" class="hidden rounded-3xl border border-red-200 bg-red-50 p-5 text-sm text-red-700"></div>
+        </section>
+    </main>
+
+    <script>
+        function loadGedDocuments() {
+            const saved = localStorage.getItem('gedDocuments');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function saveGedDocuments(documents) {
+            localStorage.setItem('gedDocuments', JSON.stringify(documents));
+        }
+
+        function getQueryParam(name) {
+            return new URLSearchParams(window.location.search).get(name);
+        }
+
+        function formatDateTime(value) {
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return value;
+            return new Intl.DateTimeFormat('pt-BR', {
+                dateStyle: 'short', timeStyle: 'short'
+            }).format(date);
+        }
+
+        function displayError(message) {
+            const errorBlock = document.getElementById('errorBlock');
+            const formContainer = document.getElementById('formContainer');
+            errorBlock.textContent = message;
+            errorBlock.classList.remove('hidden');
+            formContainer.classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            lucide.createIcons();
+            const docId = parseInt(getQueryParam('docId'), 10);
+            const documents = loadGedDocuments();
+            const documentItem = documents.find(doc => Number(doc.id) === docId);
+
+            if (!documentItem) {
+                displayError('Documento não encontrado. Verifique o link de assinatura e tente novamente.');
+                return;
+            }
+
+            document.getElementById('docTitle').textContent = documentItem.name || 'Documento sem título';
+            document.getElementById('docMeta').textContent = `Tipo: ${documentItem.type || 'Não informado'} · Setor: ${documentItem.sector || 'Não informado'}`;
+            document.getElementById('docStatus').textContent = `Status atual: ${documentItem.status || 'Pendente Assinatura'}`;
+
+            const form = document.getElementById('signatureForm');
+            const signedBlock = document.getElementById('signedBlock');
+            const backButton = document.getElementById('backToGed');
+
+            if (documentItem.status === 'Assinado & Arquivado' && documentItem.signature) {
+                document.getElementById('signatureForm').classList.add('hidden');
+                signedBlock.classList.remove('hidden');
+                document.getElementById('signedMessage').textContent = `Documento assinado por ${documentItem.signature.name} em ${formatDateTime(documentItem.signature.dateTime)}.`;
+            }
+
+            backButton.addEventListener('click', function () {
+                window.location.href = 'ged.html';
+            });
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                const name = document.getElementById('signerName').value.trim();
+                const cpf = document.getElementById('signerCPF').value.trim();
+                const funcao = document.getElementById('signerRole').value.trim();
+                const local = document.getElementById('signerLocation').value.trim();
+                const dateTime = document.getElementById('signerDateTime').value;
+
+                if (!name || !cpf || !funcao || !local || !dateTime) {
+                    displayError('Preencha todos os campos para concluir a assinatura.');
+                    return;
+                }
+
+                documentItem.signature = {
+                    name,
+                    cpf,
+                    funcao,
+                    local,
+                    dateTime,
+                    description: `Assinado eletronicamente no final do documento por ${name}, CPF ${cpf}, Função ${funcao}, Local ${local}, Data e Hora ${formatDateTime(dateTime)}.`
+                };
+                documentItem.status = 'Assinado & Arquivado';
+                documentItem.signatureLink = documentItem.signatureLink || window.location.href;
+                saveGedDocuments(documents);
+
+                document.getElementById('docStatus').textContent = `Status atual: ${documentItem.status}`;
+                document.getElementById('signatureForm').classList.add('hidden');
+                signedBlock.classList.remove('hidden');
+                document.getElementById('signedMessage').textContent = documentItem.signature.description;
+            });
+        });
+    </script>
+</body>
+</html>

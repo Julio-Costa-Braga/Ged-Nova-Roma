@@ -1,0 +1,197 @@
+/* ============================================
+   CÓDIGO PARA ATUALIZAR CADA PÁGINA
+   ============================================ */
+
+/* IMPORTANTE: 
+   1. Adicione <script src="sidebar.js"></script> no HEAD
+   2. Adicione ml-64 transition-all duration-300 ao <main>
+   3. Remova a navbar superior ou oculte com CSS
+*/
+
+/* ============================================
+   PARA GED.HTML (FINANCEIRO)
+   ============================================ */
+
+/* No <head>, ANTES de </head>, adicione: */
+<script src="sidebar.js"></script>
+
+/* SUBSTITUIR TODA A NAVBAR (<nav>...</nav>) POR ISSO: */
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30 ml-64 transition-all duration-300">
+    <div class="px-6 py-4 flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Financeiro</h1>
+            <p class="text-sm text-slate-500 mt-0.5">Gestão de documentos, captura e classificação financeira</p>
+        </div>
+        <div class="text-sm bg-blue-900 text-white px-4 py-2 rounded-lg">
+            Ambiente Administrativo v2.5
+        </div>
+    </div>
+</header>
+
+/* SUBSTITUIR <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8"> POR: */
+<main class="max-w-7xl mx-auto px-4 py-8 ml-64 transition-all duration-300 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+/* ============================================
+   PARA RH.HTML (RECURSOS HUMANOS)
+   ============================================ */
+
+/* No <head>, ANTES de </head>, adicione: */
+<script src="sidebar.js"></script>
+
+/* SUBSTITUIR TODA A NAVBAR (<nav>...</nav>) POR ISSO: */
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30 ml-64 transition-all duration-300">
+    <div class="px-6 py-4 flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Recursos Humanos</h1>
+            <p class="text-sm text-slate-500 mt-0.5">Gestão de colaboradores e documentação de RH</p>
+        </div>
+        <div class="text-sm bg-blue-900 text-white px-4 py-2 rounded-lg">
+            Ambiente Administrativo v2.5
+        </div>
+    </div>
+</header>
+
+/* SUBSTITUIR <main class="max-w-7xl mx-auto px-4 py-10"> POR: */
+<main class="max-w-7xl mx-auto px-4 py-10 ml-64 transition-all duration-300">
+
+/* ============================================
+   PARA GESTAO.HTML (GESTÃO)
+   ============================================ */
+
+/* No <head>, ANTES de </head>, adicione: */
+<script src="sidebar.js"></script>
+
+/* SUBSTITUIR TODA A NAVBAR (<nav>...</nav>) POR ISSO: */
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30 ml-64 transition-all duration-300">
+    <div class="px-6 py-4 flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Gestão do Sistema</h1>
+            <p class="text-sm text-slate-500 mt-0.5">Usuários, permissões e controle de acesso</p>
+        </div>
+        <div class="text-sm bg-blue-900 text-white px-4 py-2 rounded-lg">
+            Ambiente Administrativo v2.5
+        </div>
+    </div>
+</header>
+
+/* SUBSTITUIR <main class="max-w-7xl mx-auto px-4 py-10 space-y-8"> POR: */
+<main class="max-w-7xl mx-auto px-4 py-10 ml-64 transition-all duration-300 space-y-8">
+
+/* ============================================
+   CSS ADICIONAL (adicione em style.css)
+   ============================================ */
+
+/* Mobile responsivo */
+@media (max-width: 768px) {
+    #sidebar {
+        transform: translateX(-100%);
+    }
+    
+    #sidebar.open {
+        transform: translateX(0);
+    }
+    
+    main {
+        margin-left: 0;
+    }
+    
+    header {
+        margin-left: 0 !important;
+    }
+}
+
+/* ============================================
+   ESTRUTURA FINAL DO HEAD (PARA TODAS AS PÁGINAS)
+   ============================================ */
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GED - Faculdade Nova Roma</title>
+    <link rel="icon" type="image/x-icon" href="favicon_io/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="script.js"></script>
+    <script src="sidebar.js"></script>                    <!-- ← NOVA LINHA -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+/* ============================================
+   MUDANÇAS NOS ÍCONES (TROCAR LUCIDE POR IMAGES.PNG)
+   ============================================ */
+
+/* ANTES (Lucide): */
+<i data-lucide="file-plus-2" class="text-blue-900 w-5 h-5"></i>
+
+/* DEPOIS (images.png): */
+<img src="images.png" alt="Icon" class="w-5 h-5">
+
+/* EXEMPLO COMPLETO NA SIDEBAR: */
+<div class="flex items-center space-x-2 border-b pb-3 mb-4">
+    <img src="images.png" alt="Captura" class="w-5 h-5">
+    <h2 class="text-lg font-bold text-blue-900">1. Captura & Classificação</h2>
+</div>
+
+/* ============================================
+   QUERIES SQL PARA EXECUTAR NO SUPABASE
+   ============================================ */
+
+-- 1. Executar primeiro: 02_setup_completo.sql
+-- (Arquivo já criado em Supabase/02_setup_completo.sql)
+
+-- 2. Verificar se os usuários foram criados:
+SELECT id, nome, username, acesso FROM usuarios ORDER BY created_at DESC;
+
+-- 3. Verificar colaboradores:
+SELECT id, nome, funcao, situacao, matricula FROM colaboradores ORDER BY nome;
+
+-- 4. Se precisar resetar tudo (CUIDADO - DELETA DADOS):
+-- DELETE FROM usuarios;
+-- DELETE FROM colaboradores;
+-- DELETE FROM pastas_documentos;
+-- DELETE FROM documentos;
+
+/* ============================================
+   TESTES APÓS AS MUDANÇAS
+   ============================================ */
+
+☑️ npm install (já feito)
+☑️ Executar 02_setup_completo.sql no Supabase
+☑️ npm start
+☑️ Acessar http://localhost:3000
+☑️ Fazer login: admin@novaroma.edu.br / Nova@123!
+☑️ Verificar se sidebar aparece
+☑️ Clicar em menu para expandir submenu
+☑️ Clicar em subitem para navegar
+☑️ Testar em mobile (F12 > Toggle device toolbar)
+☑️ Testar logout
+
+/* ============================================
+   TROUBLESHOOTING
+   ============================================ */
+
+Problema: Sidebar não aparece
+Solução: 
+  1. Verificar se script src="sidebar.js" está no HEAD
+  2. Abrir F12 > Console para ver erros
+  3. Verificar se arquivo sidebar.html existe
+
+Problema: Menu não expande
+Solução:
+  1. Verificar se Lucide está carregado
+  2. Abrir F12 > Elements > procurar por .submenu
+  3. Clicar no item e ver se classe 'open' é adicionada
+
+Problema: Usuário não aparece na sidebar
+Solução:
+  1. Abrir F12 > Application > LocalStorage
+  2. Procurar por 'gedAuth' e 'gedUser'
+  3. Verificar se estão com valores
+  4. Fazer logout e login novamente
+
+Problema: Margin errada em mobile
+Solução:
+  1. Usar: <main class="ml-0 md:ml-64 transition-all duration-300">
+  2. Ou remover ml-64 de header também
+  3. Testar em F12 > Toggle device toolbar

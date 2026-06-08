@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Observador - GED</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="script.js"></script>
+    <script src="sidebar.js"></script>
+</head>
+<body class="min-h-screen bg-slate-100 font-sans text-slate-900">
+
+    <main class="max-w-7xl mx-auto p-6 space-y-6 md:ml-64">
+        <section class="grid gap-4 md:grid-cols-[1fr_auto] items-end">
+            <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
+                <h2 class="text-lg font-semibold text-slate-900">Documentos disponíveis</h2>
+                <p class="text-sm text-slate-500 mt-2">Use a busca para filtrar documentos por nome, setor ou tipo.</p>
+            </div>
+            <div class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
+                <label for="observerSearch" class="block text-xs font-semibold uppercase text-slate-500 mb-2">Buscar</label>
+                <input id="observerSearch" type="text" oninput="renderObserverDocuments()" placeholder="Digite nome, setor ou tipo" class="w-full border border-slate-300 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+            </div>
+        </section>
+
+        <section class="rounded-3xl bg-white border border-slate-200 p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-5 gap-3">
+                <div>
+                    <h3 class="text-base font-semibold text-slate-900">Lista de documentos</h3>
+                    <p class="text-sm text-slate-500">Visualize o fluxo de documentos sem permissão de edição.</p>
+                </div>
+                <span class="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-3 py-1 text-xs font-semibold">Observador</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-slate-700" style="border-collapse: collapse;">
+                    <thead class="text-xs uppercase text-slate-500 border-b border-slate-200">
+                        <tr>
+                            <th class="p-3 text-left">Documento</th>
+                            <th class="p-3 text-left">Setor</th>
+                            <th class="p-3 text-left">Tipo</th>
+                            <th class="p-3 text-left">Status</th>
+                            <th class="p-3 text-left">Expira em</th>
+                            <th class="p-3 text-left">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="observerDocTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div id="documentModal" class="fixed inset-0 hidden bg-black/40 backdrop-blur-sm z-50 items-center justify-center p-4">
+        <div class="relative w-full max-w-3xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+                <div>
+                    <h2 id="documentModalTitle" class="text-lg font-bold text-slate-900"></h2>
+                    <p id="documentModalSubtitle" class="text-sm text-slate-500"></p>
+                </div>
+                <button type="button" onclick="closeDocumentModal()" class="text-slate-500 hover:text-slate-900 rounded-full p-2">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="documentModalContent" class="p-6 space-y-4"></div>
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 text-right">
+                <button type="button" onclick="closeDocumentModal()" class="bg-slate-900 text-white px-4 py-2 rounded-2xl hover:bg-slate-800 transition">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SESSION_KEY = 'gedAuth';
+        const SESSION_USER_KEY = 'gedUser';
+        const SESSION_ACCESS_KEY = 'gedUserAccess';
+
+        const defaultObserverDocuments = [
+            {
+                id: 1,
+                name: "Contrato_Fornecedor_TI_V1.pdf",
+                type: "Contrato Prestação",
+                sector: "TI Infra",
+                status: "Pendente Assinatura",
+                date: "18/05/2026",
+                expirationDate: "2026-11-30",
+                tags: ["TI", "Fornecedor", "Contrato"],
+                flow: "Sequencial",
+                security: "Token E-mail",
+                email: "diretoria@novaroma.com.br"
+            },
+            {
+                id: 2,
+                name: "NF_9921_Papelaria_Recife.pdf",
+                type: "Nota Fiscal",
+                sector: "Financeiro",
+                status: "Assinado & Arquivado",
+                date: "15/05/2026",
+                expirationDate: "2026-09-10",
+                tags: ["Financeiro", "NF"],
+                flow: "Paralelo",
+                security: "Apenas Link",
+                email: "coordenacao@novaroma.com.br"
+            },
+            {
+                id: 3,
+                name: "Contrato_Estagio_Afonso_Pena_V2.pdf",
+                type: "Contrato Prestação",
+                sector: "RH / DP",
+                status: "Pendente Assinatura",
+                date: "17/05/2026",
+                expirationDate: "2026-12-12",
+                tags: ["RH", "Estágio"],
+                flow: "Sequencial",
+                security: "ICP-Brasil",
+                email: "estagios@novaroma.com.br"
+            }
+        ];
+
+        function escapeHTML(value) {
+            return String(value || '').replace(/[&<>'"]/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[char]);
+        }
+
+        function loadFromStorage(key, fallback) {
+            const raw = localStorage.getItem(key);
+            if (!raw) return fallback;
+            try {
+                return JSON.parse(raw);
+            } catch (error) {
+                return fallback;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem(SESSION_KEY);
+            localStorage.removeItem('gedUser');
+            localStorage.removeItem('gedUserRole');
+            localStorage.removeItem(SESSION_ACCESS_KEY);
+            window.location.href = 'index.html';
+        }
+
+        function renderObserverDocuments() {
+            const query = (document.getElementById('observerSearch').value || '').toLowerCase();
+            const tbody = document.getElementById('observerDocTableBody');
+            const documents = loadFromStorage('gedDocuments', defaultObserverDocuments);
+            tbody.innerHTML = '';
+
+            const filtered = documents.filter(doc => {
+                const tags = Array.isArray(doc.tags) ? doc.tags.join(' ') : '';
+                return doc.name.toLowerCase().includes(query) ||
+                    doc.sector.toLowerCase().includes(query) ||
+                    doc.type.toLowerCase().includes(query) ||
+                    doc.status.toLowerCase().includes(query) ||
+                    tags.toLowerCase().includes(query);
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-500">Nenhum documento encontrado.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(doc => {
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-200 hover:bg-slate-100 transition">
+                        <td class="p-3 font-semibold text-slate-900">${escapeHTML(doc.name)}</td>
+                        <td class="p-3">${escapeHTML(doc.sector)}</td>
+                        <td class="p-3">${escapeHTML(doc.type)}</td>
+                        <td class="p-3">${escapeHTML(doc.status)}</td>
+                        <td class="p-3">${escapeHTML(doc.expirationDate)}</td>
+                        <td class="p-3">
+                            <button type="button" onclick="showDocumentDetails(${doc.id})" class="text-xs font-semibold text-blue-900 hover:text-blue-700">Ver</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function showDocumentDetails(docId) {
+            const documents = loadFromStorage('gedDocuments', defaultObserverDocuments);
+            const doc = documents.find(item => item.id === docId);
+            if (!doc) return;
+
+            document.getElementById('documentModalTitle').textContent = doc.name;
+            document.getElementById('documentModalSubtitle').textContent = `${doc.type} • ${doc.sector}`;
+            document.getElementById('documentModalContent').innerHTML = `
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <div><strong>Status:</strong> ${escapeHTML(doc.status)}</div>
+                    <div><strong>Data:</strong> ${escapeHTML(doc.date)}</div>
+                    <div><strong>Expiração:</strong> ${escapeHTML(doc.expirationDate)}</div>
+                    <div><strong>Fluxo:</strong> ${escapeHTML(doc.flow)}</div>
+                    <div><strong>Segurança:</strong> ${escapeHTML(doc.security)}</div>
+                    <div><strong>E-mail:</strong> ${escapeHTML(doc.email)}</div>
+                </div>
+                <div class="mt-4">
+                    <strong>Tags:</strong>
+                    <div class="mt-2 flex flex-wrap gap-2">${(doc.tags || []).map(tag => `<span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-xs">${escapeHTML(tag)}</span>`).join('')}</div>
+                </div>
+                <div class="mt-4 text-sm text-slate-500">Este documento é apresentado apenas em modo leitura para observadores.</div>
+            `;
+            document.getElementById('documentModal').classList.remove('hidden');
+            document.getElementById('documentModal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeDocumentModal() {
+            document.getElementById('documentModal').classList.add('hidden');
+            document.getElementById('documentModal').classList.remove('flex');
+        }
+
+        function loadObserverUsers() {
+            const raw = localStorage.getItem('gedUsers');
+            if (!raw) return [];
+            try {
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function checkPermission() {
+            const activeUsername = localStorage.getItem(SESSION_KEY);
+            const access = localStorage.getItem(SESSION_ACCESS_KEY);
+            const rawDisplay = localStorage.getItem(SESSION_USER_KEY) || activeUsername;
+            let displayName = rawDisplay;
+            try { const parsed = JSON.parse(rawDisplay); displayName = parsed?.name || parsed?.username || rawDisplay; } catch {}
+
+            if (!activeUsername) { window.location.href = 'index.html'; return false; }
+
+            if (access === 'financeiro') { window.location.href = 'ged.html'; return false; }
+            if (access === 'rh') { window.location.href = 'rh.html'; return false; }
+            if (access === 'ambos') { window.location.href = 'gestao.html'; return false; }
+
+            if (access !== 'apenas-observador') { window.location.href = 'index.html'; return false; }
+
+            const userStatus = document.getElementById('userStatus');
+            if (userStatus) { userStatus.innerText = `Olá, ${displayName}`; userStatus.classList.remove('hidden'); }
+            const logoutBtn = document.getElementById('logoutButton');
+            if (logoutBtn) logoutBtn.classList.remove('hidden');
+            return true;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!checkPermission()) return;
+            renderObserverDocuments();
+            lucide.createIcons();
+            // abrir seção a partir de ?tab=
+            const params = new URLSearchParams(window.location.search);
+            const t = (params.get('tab') || '').toLowerCase();
+            if (t) {
+                if (t.includes('buscar') || t.includes('search') || t.includes('observer')) {
+                    const input = document.getElementById('observerSearch'); if (input) { input.scrollIntoView({behavior:'smooth',block:'center'}); input.focus(); }
+                } else {
+                    const el = document.getElementById('observerDocTableBody'); if (el) el.scrollIntoView({behavior:'smooth',block:'center'});
+                }
+            }
+        });
+    </script>
+    <script>window.addEventListener('DOMContentLoaded', loadSidebar);</script>
+</body>
+</html>

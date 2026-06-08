@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GED Financeiro & Sign - Faculdade Nova Roma</title>
+    <!-- Tailwind CSS para Design Moderno -->
+    <!-- Ícones Lucide (Simulação de interface profissional) -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <script src="script.js"></script>
+        <script src="sidebar.js"></script>
+    <!-- Chart.js para Gráficos Financeiros -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* Responsividade melhorada para mobile */
+        @media (max-width: 768px) {
+            /* Remover margin-left em mobile */
+            main {
+                margin-left: 0 !important;
+            }
+            
+            #tab-captura,
+            #tab-armazenamento,
+            #tab-siga,
+            #tab-assinatura,
+            #tab-parametros,
+            #tab-relatorios {
+                margin-left: 0 !important;
+                padding: 1rem;
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+            
+            /* Tabelas responsivas em mobile */
+            .overflow-x-auto {
+                margin: 0;
+                padding: 0.75rem;
+                border-radius: 0.75rem;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Reduzir padding em tabelas para mobile */
+            table td, table th {
+                padding: 0.5rem 0.75rem !important;
+                font-size: 0.875rem;
+            }
+            
+            table th {
+                font-size: 0.75rem;
+            }
+            
+            /* Grid responsivo para cards */
+            .grid {
+                gap: 1rem;
+            }
+            
+            /* Botões em coluna em mobile */
+            .flex.flex-col.gap-1 {
+                gap: 0.5rem;
+            }
+        }
+        
+        /* Suavizar scroll para navegação entre abas */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Evitar overflow horizontal global */
+        body, main {
+            overflow-x: hidden;
+            width: 100%;
+        }
+        
+        /* Melhorar scroll da tabela em mobile */
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+        
+        /* Estilo da scrollbar em navegadores modernos */
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 2px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <!-- CONTAINER PRINCIPAL -->
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-6 md:ml-64">
+        
+        <!-- PAINEL CAPTURA & CLASSIFICAÇÃO -->
+        <div id="tab-captura" class="tab-panel hidden space-y-6">
+            
+            <!-- PAINEL 1: CAPTURA & INDEXAÇÃO -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center space-x-2 border-b pb-3 mb-4">
+                    <i data-lucide="file-plus-2" class="text-blue-900 w-5 h-5"></i>
+                    <h2 class="text-lg font-bold text-blue-900">1. Captura & Classificação</h2>
+                </div>
+
+                <form id="gedForm" class="space-y-4">
+                    <!-- Dropzone de Arquivo -->
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Upload do Documento (PDF/Imagem)</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50 hover:bg-gray-100 transition cursor-pointer relative">
+                            <input type="file" id="fileInput" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required onchange="updateFileName()">
+                            <i data-lucide="upload-cloud" class="mx-auto text-gray-400 w-8 h-8 mb-1"></i>
+                            <p id="fileNameDisplay" class="text-sm text-gray-600 font-medium">Arraste ou clique para anexar</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Suporta OCR automático após envio</p>
+                        </div>
+                    </div>
+
+                    <!-- Campos de Indexação -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Tipo de Doc.</label>
+                            <select id="docType" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                                <option value="Contrato Prestação">Contrato Prestação</option>
+                                <option value="Nota Fiscal">Nota Fiscal</option>
+                                <option value="Boleto/Recibo">Boleto / Recibo</option>
+                                <option value="Aditivo Contratual">Aditivo Contratual</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Centro de Custo</label>
+                            <select id="sector" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                                <option value="Financeiro">Financeiro</option>
+                                <option value="Acadêmico">Acadêmico</option>
+                                <option value="RH / DP">RH / DP</option>
+                                <option value="TI Infra">TI Infra</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Identificador (RA/CNPJ)</label>
+                            <input type="text" id="identifier" placeholder="Ex: 202610992" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Valor (R$)</label>
+                            <input type="number" id="docValue" placeholder="0,00" step="0.01" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Categoria Financeira</label>
+                        <select id="docFinanceType" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                            <option value="Despesa" selected>Despesa</option>
+                            <option value="Receita">Receita</option>
+                        </select>
+                    </div>
+
+                    <!-- CAMPOS DE INDEXAÇÃO PARA PESQUISA -->
+                    <div class="bg-purple-50/50 border border-purple-100 rounded-lg p-4 mt-4 space-y-3">
+                        <div class="flex items-center space-x-2 pb-1 border-b border-purple-100">
+                            <i data-lucide="calendar" class="text-purple-600 w-4 h-4"></i>
+                            <h3 class="text-sm font-bold text-purple-950">Indexação para Pesquisa</h3>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-0.5">Data de Envio</label>
+                                <input type="date" id="dateDocSent" class="w-full border border-gray-300 rounded p-1.5 text-xs focus:ring-2 focus:ring-purple-500 outline-none bg-white" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-0.5">Data de Pagamento</label>
+                                <input type="date" id="datePayment" class="w-full border border-gray-300 rounded p-1.5 text-xs focus:ring-2 focus:ring-purple-500 outline-none bg-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-0.5">Número de Nota Fiscal</label>
+                            <input type="text" id="invoiceNumber" placeholder="Ex: NF-001234" class="w-full border border-gray-300 rounded p-1.5 text-xs focus:ring-2 focus:ring-purple-500 outline-none bg-white">
+                        </div>
+                    </div>
+
+                    <!-- PAINEL DE TAGS ANTES DO ENVIO -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mt-4 space-y-3">
+                        <div class="flex items-center space-x-2 pb-1 border-b border-slate-200">
+                            <i data-lucide="tag" class="text-slate-700 w-4 h-4"></i>
+                            <h3 class="text-sm font-bold text-slate-900">Tags do Documento</h3>
+                        </div>
+                        <div class="flex gap-2 items-center">
+                            <input id="docTagInput" type="text" placeholder="Ex: urgente, fiscal, contrato" class="flex-1 border border-slate-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                            <button type="button" onclick="addDocTagToList()" class="rounded-xl bg-blue-900 text-white px-4 py-2 text-sm hover:bg-blue-800 transition">Adicionar</button>
+                        </div>
+                        <div id="docTagList" class="flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mt-4 space-y-3">
+                        <div class="flex items-center space-x-2 pb-1 border-b border-slate-200">
+                            <i data-lucide="book-open" class="text-slate-700 w-4 h-4"></i>
+                            <h3 class="text-sm font-bold text-slate-900">Planilha SIGA</h3>
+                        </div>
+                        <p class="text-xs text-slate-500">Selecione os códigos detalhados do documento para múltipla escolha.</p>
+                        <div class="grid grid-cols-1 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Códigos SIGA</label>
+                                <select id="sigaCodes" multiple size="5" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                                    <option value="DOC-001|Nota Fiscal">DOC-001 - Nota Fiscal</option>
+                                    <option value="DOC-002|Contrato">DOC-002 - Contrato</option>
+                                    <option value="DOC-003|Boleto">DOC-003 - Boleto</option>
+                                    <option value="DOC-004|Aditivo">DOC-004 - Aditivo Contratual</option>
+                                    <option value="DOC-005|Comprovante">DOC-005 - Comprovante de Pagamento</option>
+                                </select>
+                            </div>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Prazo de validade legal</label>
+                                    <input type="date" id="expirationDate" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                                    <p class="text-xs text-slate-500 mt-1">Informe a data em que o documento perde validade legal.</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Avisar antes do vencimento</label>
+                                    <select id="expirationReminderDays" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none bg-white">
+                                        <option value="1">1 dia antes</option>
+                                        <option value="3" selected>3 dias antes</option>
+                                        <option value="7">7 dias antes</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PAINEL DE PARAMETRIZAÇÃO DO SIGN INTEGRADO -->
+                    <div class="bg-blue-50/50 border border-blue-100 rounded-lg p-4 mt-4 space-y-3">
+                        <div class="flex items-center space-x-2 pb-1 border-b border-blue-100">
+                            <i data-lucide="mail-check" class="text-orange-500 w-4 h-4"></i>
+                            <h3 class="text-sm font-bold text-blue-950">Parâmetros de Assinatura (E-mail)</h3>
+                        </div>
+
+                        <!-- E-mail Principal (Signatário Primário) -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-0.5">E-mail do Signatário (Principal)</label>
+                            <input type="email" id="signerEmail" placeholder="diretoria@novaroma.com.br" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-orange-500 outline-none bg-white" required>
+                        </div>
+
+                        <!-- Múltiplos Destinatários para Cópia (até 5) -->
+                        <div class="bg-orange-50 border border-orange-100 rounded p-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-xs font-bold text-orange-900">Destinatários Adicionais (até 5)</label>
+                                <span class="text-xs bg-orange-200 text-orange-800 px-2 py-0.5 rounded font-semibold" id="recipientCounter">0/5</span>
+                            </div>
+                            <div id="additionalRecipientsContainer" class="space-y-1.5">
+                                <!-- Campos de e-mail adicionais serão inseridos dinamicamente -->
+                            </div>
+                            <button type="button" onclick="addRecipientField()" class="text-xs font-semibold mt-2 text-orange-600 hover:text-orange-700 flex items-center space-x-1">
+                                <i data-lucide="plus" class="w-3 h-3"></i>
+                                <span>Adicionar Destinatário</span>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-0.5">Fluxo Workflow</label>
+                                <select id="flowType" class="w-full border border-gray-300 rounded p-1.5 text-xs bg-white">
+                                    <option value="Sequencial">Sequencial (Ordem)</option>
+                                    <option value="Paralelo">Paralelo (Todos)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-0.5">Segurança Extra</label>
+                                <select id="authType" class="w-full border border-gray-300 rounded p-1.5 text-xs bg-white">
+                                    <option value="Token E-mail">Token via E-mail</option>
+                                    <option value="ICP-Brasil">Certificado ICP</option>
+                                    <option value="Apenas Link">Apenas Link Único</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-2 pt-1">
+                            <input type="checkbox" id="reminders" checked class="rounded text-orange-500 focus:ring-orange-500 h-4 w-4">
+                            <label for="reminders" class="text-xs text-gray-600">Cobrança automática a cada 48h</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-4 rounded transition flex items-center justify-center space-x-2 shadow-sm">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        <span>Processar e Enviar para Assinatura</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- PAINEL ARMAZENAMENTO & CONTROLE -->
+        <div id="tab-armazenamento" class="tab-panel hidden space-y-6">
+            
+            <!-- BUSCA RÁPIDA (OCR E PALAVRAS-CHAVE) -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-3 items-center">
+                <div class="relative w-full">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <i data-lucide="search" class="text-gray-400 w-5 h-5"></i>
+                    </span>
+                    <input type="text" id="searchInput" onkeyup="filterDocuments()" placeholder="Busca Rápida inteligente (Pesquise por Tipo, Setor, ID ou termos internos via OCR...)" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                </div>
+                <div class="flex space-x-2 w-full md:w-auto shrink-0 justify-end">
+                    <span class="text-xs font-medium text-gray-500 bg-gray-100 border px-3 py-2 rounded-lg flex items-center space-x-1">
+                        <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+                        <span>OCR Ativo</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- ARMAZENAMENTO E CONTROLE (GRID DE DOCUMENTOS) -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50/75">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="folder-open" class="text-blue-900 w-5 h-5"></i>
+                        <h2 class="text-lg font-bold text-blue-900">Armazenamento & Controle de Fluxo</h2>
+                    </div>
+                    <span class="text-xs font-semibold text-blue-900 bg-blue-100 px-2.5 py-1 rounded-full" id="docCounter">3 Documentos</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 border-b border-gray-200 text-xs font-bold text-gray-600 uppercase tracking-wider">
+                                <th class="p-4">Documento / ID</th>
+                                <th class="p-4">Setor / Valor</th>
+                                <th class="p-4">Destinatário Sign</th>
+                                <th class="p-4">Status Workflow</th>
+                                <th class="p-4 text-center">Ações / Versão</th>
+                            </tr>
+                        </thead>
+                        <tbody id="documentTableBody" class="divide-y divide-gray-200 text-sm">
+                            <!-- Inseridos via JavaScript Dinâmico -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CARD EXPLICATIVO DO SCRIPT DE JUSANTE -->
+            <div class="bg-blue-900 text-blue-100 rounded-xl p-5 shadow-inner flex items-start space-x-4">
+                <i data-lucide="info" class="w-6 h-6 text-orange-400 shrink-0 mt-0.5"></i>
+                <div class="text-xs space-y-1">
+                    <p class="font-bold text-white text-sm">Informação do Sistema Faculdade Nova Roma</p>
+                    <p>Este painel consolida de forma contínua o fluxo de **Captura**, **Indexação Automática**, extração de metadados por **OCR**, **Versionamento Seguro em Nuvem** e o roteamento de **Workflow de Assinatura Digital** direto no e-mail dos gestores e diretores.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <section id="tab-siga" class="tab-panel hidden max-w-7xl mx-auto px-4 py-12">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center space-x-2 border-b pb-3 mb-4">
+                    <i data-lucide="file-text" class="text-indigo-600 w-5 h-5"></i>
+                    <h2 class="text-lg font-bold text-indigo-900">Planilha SIGA</h2>
+                </div>
+                <p class="text-sm text-gray-600">Acesse os indicadores SIGA, exporte planilhas e controle metas de forma integrada.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                        <p class="text-xs uppercase text-indigo-500 font-semibold mb-2">Resumo</p>
+                        <p class="text-sm text-indigo-700">Visão consolidada de SIGA com status de pendências e índices-chave.</p>
+                    </div>
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                        <p class="text-xs uppercase text-indigo-500 font-semibold mb-2">Ações</p>
+                        <ul class="text-sm text-indigo-700 space-y-2">
+                            <li>📥 Importar planilha</li>
+                            <li>📤 Exportar resultados</li>
+                            <li>📊 Atualizar métricas</li>
+                        </ul>
+                    </div>
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                        <p class="text-xs uppercase text-indigo-500 font-semibold mb-2">Controle</p>
+                        <p class="text-sm text-indigo-700">Gestão de índices SIGA e conformidade com relatórios internos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-assinatura" class="tab-panel hidden max-w-7xl mx-auto px-4 py-12">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center space-x-2 border-b pb-3 mb-4">
+                    <i data-lucide="mail" class="text-cyan-600 w-5 h-5"></i>
+                    <h2 class="text-lg font-bold text-cyan-900">Parâmetros de Assinatura (E-mail)</h2>
+                </div>
+                <p class="text-sm text-gray-600">Configure regras de assinatura eletrônica e notificações por e-mail.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <label class="block text-xs uppercase text-slate-500 mb-2">Remetente de e-mail</label>
+                        <input type="email" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="assinatura@novaroma.edu.br">
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <label class="block text-xs uppercase text-slate-500 mb-2">Assunto padrão</label>
+                        <input type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="Assine o documento X até ...">
+                    </div>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-3">
+                    <button class="rounded-xl bg-cyan-900 text-white px-4 py-2 text-sm font-semibold hover:bg-cyan-800 transition">Salvar parâmetros</button>
+                    <button class="rounded-xl bg-slate-100 text-slate-700 px-4 py-2 text-sm font-semibold hover:bg-slate-200 transition">Testar envio de e-mail</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-parametros" class="tab-panel hidden max-w-7xl mx-auto px-4 py-12">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center space-x-2 border-b pb-3 mb-4">
+                    <i data-lucide="sliders-horizontal" class="text-amber-600 w-5 h-5"></i>
+                    <h2 class="text-lg font-bold text-amber-900">Gestão de Parâmetros (GED)</h2>
+                </div>
+                <p class="text-sm text-gray-600">Ajuste parâmetros globais do GED, regras de fluxo e regras de indexação de documentos.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <p class="text-xs uppercase text-amber-500 mb-2 font-semibold">Parâmetros de fluxo</p>
+                        <ul class="text-sm text-amber-700 space-y-2">
+                            <li>✅ Ativar auditoria</li>
+                            <li>🕒 Prazos automáticos</li>
+                            <li>🔄 Ciclo de revisão</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <p class="text-xs uppercase text-amber-500 mb-2 font-semibold">Regras de indexação</p>
+                        <ul class="text-sm text-amber-700 space-y-2">
+                            <li>🗂️ Padrões de nome</li>
+                            <li>🔎 Campos obrigatórios</li>
+                            <li>📌 Etiquetas automáticas</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RELATÓRIOS FINANCEIROS -->
+        <section id="tab-relatorios" class="tab-panel hidden w-full max-w-7xl px-4 py-12 space-y-6">
+            <div class="mb-8">
+                <div class="flex items-center space-x-3 mb-6">
+                    <i data-lucide="trending-up" class="text-green-600 w-6 h-6"></i>
+                    <h1 class="text-3xl font-bold text-gray-900">Relatórios Financeiros & Fluxo de Caixa</h1>
+                </div>
+                <p class="text-gray-600">Análise financeira consolidada com projeções de caixa, receitas e despesas por centro de custo.</p>
+            </div>
+
+            <!-- CARDS RESUMO FINANCEIRO -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 min-w-0">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-semibold">Saldo Total</p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1" id="totalBalance">R$ 0,00</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <i data-lucide="wallet" class="text-blue-600 w-6 h-6"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 min-w-0">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-semibold">Receitas (Mês)</p>
+                        <p class="text-2xl font-bold text-green-600 mt-1" id="monthlyIncome">R$ 0,00</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <i data-lucide="arrow-up-circle" class="text-green-600 w-6 h-6"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 min-w-0">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-semibold">Despesas (Mês)</p>
+                        <p class="text-2xl font-bold text-red-600 mt-1" id="monthlyExpense">R$ 0,00</p>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-lg">
+                        <i data-lucide="arrow-down-circle" class="text-red-600 w-6 h-6"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 min-w-0">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm font-semibold">Projeção Trimestral</p>
+                        <p class="text-2xl font-bold text-orange-600 mt-1" id="quarterlyProjection">R$ 0,00</p>
+                    </div>
+                    <div class="bg-orange-100 p-3 rounded-lg">
+                        <i data-lucide="chart-line" class="text-orange-600 w-6 h-6"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRÁFICOS FINANCEIROS -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Gráfico de Fluxo Mensal -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center space-x-2 border-b pb-4 mb-4">
+                    <i data-lucide="bar-chart-2" class="text-blue-600 w-5 h-5"></i>
+                    <h3 class="text-lg font-bold text-gray-900">Fluxo Mensal (Últimos 6 Meses)</h3>
+                </div>
+                <canvas id="monthlyFlowChart" class="w-full h-[320px]"></canvas>
+            </div>
+
+            <!-- Gráfico de Distribuição por Centro de Custo -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center space-x-2 border-b pb-4 mb-4">
+                    <i data-lucide="pie-chart" class="text-purple-600 w-5 h-5"></i>
+                    <h3 class="text-lg font-bold text-gray-900">Despesas por Centro de Custo</h3>
+                </div>
+                <canvas id="departmentChart" class="w-full h-[320px]"></canvas>
+            </div>
+        </div>
+
+        <!-- TABELA DE FLUXO DE CAIXA DETALHADA -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center bg-gray-50/75">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="list" class="text-blue-900 w-5 h-5"></i>
+                    <h2 class="text-lg font-bold text-blue-900">Detalhamento do Fluxo de Caixa</h2>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="exportToCSV()" class="text-xs font-semibold bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded transition flex items-center space-x-1">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>Exportar CSV</span>
+                    </button>
+                    <button onclick="printReport()" class="text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1.5 rounded transition flex items-center space-x-1">
+                        <i data-lucide="printer" class="w-4 h-4"></i>
+                        <span>Imprimir</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtros de Data -->
+            <div class="p-4 bg-gray-50 border-b border-gray-200 flex flex-wrap gap-3">
+                <div class="flex items-center space-x-2">
+                    <label class="text-xs font-semibold text-gray-600">Período:</label>
+                    <select id="filterMonth" onchange="applyFinancialFilters()" class="border border-gray-300 rounded px-2 py-1 text-sm">
+                        <option value="todos">Todos os Meses</option>
+                        <option value="janeiro">Janeiro</option>
+                        <option value="fevereiro">Fevereiro</option>
+                        <option value="marco">Março</option>
+                        <option value="abril">Abril</option>
+                        <option value="maio" selected>Maio</option>
+                        <option value="junho">Junho</option>
+                    </select>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label class="text-xs font-semibold text-gray-600">Centro de Custo:</label>
+                    <select id="filterSector" onchange="applyFinancialFilters()" class="border border-gray-300 rounded px-2 py-1 text-sm">
+                        <option value="">Todos</option>
+                        <option value="Financeiro">Financeiro</option>
+                        <option value="Acadêmico">Acadêmico</option>
+                        <option value="RH / DP">RH / DP</option>
+                        <option value="TI Infra">TI Infra</option>
+                    </select>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label class="text-xs font-semibold text-gray-600">Tipo:</label>
+                    <select id="filterType" onchange="applyFinancialFilters()" class="border border-gray-300 rounded px-2 py-1 text-sm">
+                        <option value="">Todos</option>
+                        <option value="Receita">Receitas</option>
+                        <option value="Despesa">Despesas</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="p-4 bg-white border-b border-gray-200 grid grid-cols-1 lg:grid-cols-4 gap-3 items-end">
+                <div class="rounded-xl bg-slate-50 p-4">
+                    <p class="text-xs text-gray-500">Total Entradas</p>
+                    <p class="text-2xl font-bold text-green-700" id="totalEntries">R$ 0,00</p>
+                </div>
+                <div class="rounded-xl bg-slate-50 p-4">
+                    <p class="text-xs text-gray-500">Total Saídas</p>
+                    <p class="text-2xl font-bold text-red-700" id="totalExits">R$ 0,00</p>
+                </div>
+                <div class="rounded-xl bg-slate-50 p-4">
+                    <p class="text-xs text-gray-500">Saldo Atual</p>
+                    <p class="text-2xl font-bold text-blue-900" id="currentCashBalance">R$ 0,00</p>
+                </div>
+                <div class="rounded-xl bg-slate-50 p-4 flex flex-col justify-between">
+                    <div>
+                        <p class="text-xs text-gray-500">Fluxo Automático</p>
+                        <p class="text-sm text-gray-700 mt-1">Entradas e saídas calculadas automaticamente na planilha.</p>
+                    </div>
+                    <button onclick="toggleTransactionEditor()" class="text-xs font-semibold bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-2 rounded-lg transition mt-3">Adicionar lançamento</button>
+                </div>
+            </div>
+
+            <div id="transactionEditor" class="hidden p-4 bg-blue-50 border-b border-blue-100">
+                <div class="grid grid-cols-1 xl:grid-cols-5 gap-3 items-end">
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 uppercase mb-2 block">Data</label>
+                        <input id="newTransactionDate" type="date" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                    </div>
+                    <div class="xl:col-span-2">
+                        <label class="text-xs font-semibold text-gray-600 uppercase mb-2 block">Descrição</label>
+                        <input id="newTransactionDescription" type="text" placeholder="Ex: Recebimento de matrícula" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 uppercase mb-2 block">Centro de Custo</label>
+                        <select id="newTransactionSector" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                            <option value="Financeiro">Financeiro</option>
+                            <option value="Acadêmico">Acadêmico</option>
+                            <option value="RH / DP">RH / DP</option>
+                            <option value="TI Infra">TI Infra</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 uppercase mb-2 block">Tipo</label>
+                        <select id="newTransactionType" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                            <option value="Receita">Receita</option>
+                            <option value="Despesa">Despesa</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 uppercase mb-2 block">Valor</label>
+                        <input id="newTransactionValue" type="number" step="0.01" placeholder="0.00" class="w-full border border-gray-300 rounded p-2 text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                    </div>
+                    <div class="xl:col-span-5 flex justify-end">
+                        <button id="addTransactionButton" onclick="addTransaction()" type="button" class="text-xs font-semibold bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition">Salvar lançamento</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto bg-slate-50 p-3 rounded-b-xl -mx-4 px-4">
+                <table class="w-full border border-slate-300 bg-white text-left" style="border-collapse: collapse; min-width: 800px;">
+                    <thead>
+                        <tr class="bg-slate-100 text-xs font-bold text-slate-600 uppercase tracking-wider sticky top-0">
+                            <th class="p-3 border border-slate-300 whitespace-nowrap">Data</th>
+                            <th class="p-3 border border-slate-300 whitespace-nowrap">Descrição</th>
+                            <th class="p-3 border border-slate-300 whitespace-nowrap">Centro de Custo</th>
+                            <th class="p-3 border border-slate-300 whitespace-nowrap">Tipo</th>
+                            <th class="p-3 border border-slate-300 whitespace-nowrap text-right">Valor</th>
+                            <th class="p-3 border border-slate-300 whitespace-nowrap text-right">Saldo Acumulado</th>
+                            <th class="p-3 border border-slate-300 whitespace-nowrap text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cashFlowTableBody" class="text-sm">
+                        <!-- Preenchido dinamicamente via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- INFORMAÇÃO E ANÁLISE -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="bg-green-900 text-green-100 rounded-xl p-5 shadow-inner flex items-start space-x-4">
+                <i data-lucide="check-circle" class="w-6 h-6 text-green-400 shrink-0 mt-0.5"></i>
+                <div class="text-xs space-y-1">
+                    <p class="font-bold text-white text-sm">Saúde Financeira</p>
+                    <p id="healthStatus">Saldo positivo. Receitas acompanham despesas conforme planejado. Projeção favorável para próximo trimestre.</p>
+                </div>
+            </div>
+            <div class="bg-blue-900 text-blue-100 rounded-xl p-5 shadow-inner flex items-start space-x-4">
+                <i data-lucide="alert-circle" class="w-6 h-6 text-blue-400 shrink-0 mt-0.5"></i>
+                <div class="text-xs space-y-1">
+                    <p class="font-bold text-white text-sm">Centro de Custo em Destaque</p>
+                    <p id="topCostCenter">TI Infra apresenta a maior despesa consolidada com 35% do orçamento mensal.</p>
+                </div>
+            </div>
+            <div class="bg-orange-900 text-orange-100 rounded-xl p-5 shadow-inner flex items-start space-x-4">
+                <i data-lucide="trending-up" class="w-6 h-6 text-orange-400 shrink-0 mt-0.5"></i>
+                <div class="text-xs space-y-1">
+                    <p class="font-bold text-white text-sm">Meta de Economia</p>
+                    <p id="economyTarget">Reduzir despesas em 5% nos próximos 3 meses. Meta atual: 2,3% alcançada.</p>
+                </div>
+            </div>
+        </div>
+        </section>
+    </main>
+
+    <!-- NOTIFICAÇÃO DE SUCESSO DO WORKFLOW (TOAST) -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition duration-300 pointer-events-none z-50">
+        <div class="bg-green-500 p-1.5 rounded-full text-white">
+            <i data-lucide="check" class="w-4 h-4"></i>
+        </div>
+        <div>
+            <p class="text-sm font-bold" id="toastTitle">Documento Processado!</p>
+            <p class="text-xs text-gray-400" id="toastMsg">E-mail de assinatura enviado com sucesso.</p>
+        </div>
+    </div>
+
+    <!-- MODAL DE DOCUMENTO -->
+    <div id="documentModal" class="fixed inset-0 hidden bg-black/40 backdrop-blur-sm z-50 items-center justify-center p-4">
+        <div class="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+                <div>
+                    <h2 id="documentModalTitle" class="text-lg font-bold text-slate-900"></h2>
+                    <p id="documentModalSubtitle" class="text-sm text-slate-500"></p>
+                </div>
+                <button type="button" onclick="closeDocumentModal()" class="text-slate-500 hover:text-slate-900 rounded-full p-2">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="documentModalContent" class="p-6 max-h-[75vh] overflow-y-auto"></div>
+            <div id="documentModalFooter" class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3"></div>
+        </div>
+    </div>
+
+    <!-- LOGICA DO SISTEMA (JAVASCRIPT) -->
+    <script>
+        console.log('Script iniciando...');
+        function loadStoredUsers() {
+            const raw = localStorage.getItem('gedUsers');
+            if (!raw) return [];
+            try {
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function setGedTab(tab) {
+            const normalized = String(tab || '').toLowerCase();
+            const panels = {
+                captura: 'tab-captura',
+                documentos: 'tab-armazenamento',
+                armazenamento: 'tab-armazenamento',
+                relatorios: 'tab-relatorios',
+                'relatórios': 'tab-relatorios',
+                'fluxo-caixa': 'tab-relatorios',
+                siga: 'tab-siga',
+                assinatura: 'tab-assinatura',
+                'assinatura-email': 'tab-assinatura',
+                parametros: 'tab-parametros'
+            };
+
+            const activeId = panels[normalized] || 'tab-armazenamento';
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
+            const activePanel = document.getElementById(activeId);
+            if (activePanel) {
+                activePanel.classList.remove('hidden');
+                // Aguarda um frame para garantir que o elemento foi renderizado
+                requestAnimationFrame(() => {
+                    activePanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            }
+        }
+
+        function sidebarNavigate(page, tab) {
+            const safeTab = tab ? encodeURIComponent(tab) : '';
+            
+            // Fecha sidebar em mobile após clicar
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && window.innerWidth <= 768) {
+                sidebar.classList.remove('open');
+            }
+            
+            if (page === 'ged') {
+                setGedTab(tab);
+                window.history.pushState({}, '', `?tab=${safeTab}`);
+                // Scroll para o topo
+                setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 100);
+                return;
+            }
+            if (page === 'rh') {
+                window.location.href = `rh.html${safeTab ? `?tab=${safeTab}` : ''}`;
+                return;
+            }
+            if (page === 'gestao') {
+                window.location.href = `gestao.html${safeTab ? `?tab=${safeTab}` : ''}`;
+                return;
+            }
+            window.location.href = `${page}.html${safeTab ? `?tab=${safeTab}` : ''}`;
+        }
+
+        function checkPermission() {
+            const activeUsername = localStorage.getItem('gedAuth');
+            const access = localStorage.getItem('gedUserAccess');
+            const rawDisplay = localStorage.getItem('gedUser') || activeUsername;
+            let displayName = rawDisplay;
+            try { const parsed = JSON.parse(rawDisplay); displayName = parsed?.name || parsed?.username || rawDisplay; } catch {}
+
+            if (!activeUsername) { allowPublicAccess('ged'); }
+
+            let modules = {};
+            try { modules = JSON.parse(localStorage.getItem('gedUserModules') || '{}'); } catch {}
+            const readOnly = localStorage.getItem('gedUserReadOnly') === 'true';
+
+            if (access === 'rh') { /* redirect to RH in original behavior */ }
+            if (access === 'apenas-observador') { /* redirect to OBSERVADOR in original behavior */ }
+
+            if (access === 'financeiro' || access === 'ambos' || (modules && modules.ged)) {
+                const userStatus = document.getElementById('userStatus');
+                if (userStatus) { userStatus.innerText = `Olá, ${displayName}`; userStatus.classList.remove('hidden'); }
+                const logoutBtn = document.getElementById('logoutButton');
+                if (logoutBtn) logoutBtn.classList.remove('hidden');
+                if (readOnly && typeof applyObserverMode === 'function') setTimeout(applyObserverMode, 100);
+                return true;
+            }
+
+            // fallback: enable public access to GED
+            modules.ged = true; localStorage.setItem('gedUserModules', JSON.stringify(modules));
+            return true;
+        }
+
+        function escapeHTML(value) {
+            return String(value || '').replace(/[&<>'"]/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[char]);
+        }
+
+        let currentTransactionId = null;
+
+        function logout() {
+            localStorage.removeItem('gedAuth');
+            localStorage.removeItem('gedUser');
+            localStorage.removeItem('gedUserRole');
+            localStorage.removeItem('gedUserAccess');
+            window.location.href = 'index.html';
+        }
+
+        // ========== DADOS FINANCEIROS DO FLUXO DE CAIXA ==========
+        let cashFlowData = [
+            { id: 1, date: "01/05/2026", description: "Matrícula - Turma A2026", sector: "Acadêmico", type: "Receita", value: 25000.00, balance: 25000.00 },
+            { id: 2, date: "02/05/2026", description: "Folha de Pagamento Maio", sector: "RH / DP", type: "Despesa", value: 45000.00, balance: -20000.00 },
+            { id: 3, date: "03/05/2026", description: "Contrato TI - Infraestrutura", sector: "TI Infra", type: "Despesa", value: 15400.00, balance: -35400.00 },
+            { id: 4, date: "05/05/2026", description: "Bolsas e Auxílios", sector: "Acadêmico", type: "Despesa", value: 12000.00, balance: -47400.00 },
+            { id: 5, date: "07/05/2026", description: "Matrícula - Extensão", sector: "Acadêmico", type: "Receita", value: 8500.00, balance: -38900.00 },
+            { id: 6, date: "08/05/2026", description: "Material e Papelaria", sector: "Financeiro", type: "Despesa", value: 1250.00, balance: -40150.00 },
+            { id: 7, date: "10/05/2026", description: "Convênios Educacionais", sector: "Acadêmico", type: "Receita", value: 18000.00, balance: -22150.00 },
+            { id: 8, date: "12/05/2026", description: "Energia e Utilidades", sector: "TI Infra", type: "Despesa", value: 3200.00, balance: -25350.00 },
+            { id: 9, date: "14/05/2026", description: "Taxas e Serviços Financeiros", sector: "Financeiro", type: "Despesa", value: 2150.00, balance: -27500.00 },
+            { id: 10, date: "16/05/2026", description: "Consultoria Educacional", sector: "Acadêmico", type: "Receita", value: 6000.00, balance: -21500.00 },
+            { id: 11, date: "18/05/2026", description: "Manutenção de Infraestrutura", sector: "TI Infra", type: "Despesa", value: 5300.00, balance: -26800.00 },
+            { id: 12, date: "20/05/2026", description: "Transferência - Alunos", sector: "Acadêmico", type: "Receita", value: 35000.00, balance: 8200.00 },
+            { id: 13, date: "22/05/2026", description: "Eventos e Palestras", sector: "Acadêmico", type: "Despesa", value: 4500.00, balance: 3700.00 },
+            { id: 14, date: "25/05/2026", description: "Fornecedor - Equipamentos", sector: "RH / DP", type: "Despesa", value: 8900.00, balance: -5200.00 },
+            { id: 15, date: "28/05/2026", description: "Repasse de Fundos", sector: "Financeiro", type: "Receita", value: 50000.00, balance: 44800.00 }
+        ];
+
+        // Banco de dados simulado inicial (Mock Data) - ATUALIZADO COM INTEGRAÇÃO
+        let dbDocuments = [
+            {
+                id: 1,
+                name: "Contrato_Fornecedor_TI_V1.pdf",
+                type: "Contrato Prestação",
+                sector: "TI Infra",
+                identifier: "04.223.102/0001-90",
+                value: "15400.00",
+                financeType: "Despesa",
+                tags: ["TI", "Fornecedor", "Contrato"],
+                indexers: ["Projeto TI", "Infra"],
+                email: "diretoria@novaroma.com.br",
+                flow: "Sequencial",
+                security: "Token E-mail",
+                status: "Pendente Assinatura",
+                version: 1,
+                date: "18/05/2026",
+                documentCodes: ["DOC-002|Contrato"],
+                expirationDate: "2026-11-30",
+                expirationReminderDays: 7
+            },
+            {
+                id: 2,
+                name: "NF_9921_Papelaria_Recife.pdf",
+                type: "Nota Fiscal",
+                sector: "Financeiro",
+                identifier: "10.400.221/0001-11",
+                value: "1250.00",
+                email: "coordenacao@novaroma.com.br",
+                flow: "Paralelo",
+                security: "Apenas Link",
+                status: "Assinado & Arquivado",
+                version: 1,
+                date: "15/05/2026",
+                documentCodes: ["DOC-001|Nota Fiscal"],
+                expirationDate: "2026-06-15",
+                expirationReminderDays: 3
+            },
+            {
+                id: 3,
+                name: "Contrato_Estagio_Afonso_Pena_V2.pdf",
+                type: "Contrato Prestação",
+                sector: "RH / DP",
+                identifier: "RA-20252001",
+                value: "0.00",
+                financeType: "Despesa",
+                tags: ["RH", "Estágio"],
+                indexers: ["Estágio", "Afonso Pena"],
+                email: "estagios@novaroma.com.br",
+                flow: "Sequencial",
+                security: "ICP-Brasil",
+                status: "Pendente Assinatura",
+                version: 2,
+                date: "17/05/2026",
+                documentCodes: ["DOC-002|Contrato", "DOC-005|Comprovante"],
+                expirationDate: "2026-09-10",
+                expirationReminderDays: 7
+            }
+        ];
+
+        // ─── Persistência Local (Fallback) ───────────────────────────────────────
+
+        function loadSavedDocuments() {
+            const raw = localStorage.getItem('gedDocuments');
+            if (!raw) return dbDocuments;
+            try {
+                const parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed)) return dbDocuments;
+                return parsed.map(doc => ({ ...doc, attachments: Array.isArray(doc.attachments) ? doc.attachments : [] }));
+            } catch (error) {
+                console.warn('Erro ao carregar documentos do localStorage:', error);
+                return dbDocuments;
+            }
+        }
+
+        function saveGedDocuments() {
+            try {
+                localStorage.setItem('gedDocuments', JSON.stringify(dbDocuments));
+            } catch (error) {
+                console.warn('Erro ao salvar documentos em localStorage:', error);
+            }
+        }
+
+        function mapBackendDocToClientDoc(doc) {
+            return {
+                id: doc.id,
+                name: doc.nome_arquivo || doc.name || 'Documento GED',
+                type: doc.tipo_documento || doc.type || 'Documento',
+                sector: doc.setor || doc.sector || 'Financeiro',
+                identifier: doc.cnpj || doc.cpf || doc.identifier || '',
+                value: doc.valor != null ? String(doc.valor) : (doc.value || '0.00'),
+                financeType: doc.tipo_financeiro || doc.financeType || '',
+                tags: Array.isArray(doc.tags) ? doc.tags : (doc.tags ? String(doc.tags).split(',').map(tag => tag.trim()) : []),
+                email: doc.email_assinante || doc.email || '',
+                flow: doc.flow || doc.flow || 'N/A',
+                security: doc.security || doc.security || 'N/A',
+                status: doc.status || 'Pendente Assinatura',
+                version: doc.version || 1,
+                date: doc.data_envio ? new Date(doc.data_envio).toLocaleDateString('pt-BR') : (doc.date || ''),
+                dateSent: doc.data_envio || doc.dateSent || '',
+                datePayment: doc.data_vencimento || doc.datePayment || null,
+                invoiceNumber: doc.numero_nota || doc.invoiceNumber || null,
+                attachments: Array.isArray(doc.attachments) ? doc.attachments : []
+            };
+        }
+
+        function prepareDocumentPayload(doc) {
+            return {
+                tipo_documento: doc.type,
+                setor: doc.sector,
+                cpf: doc.identifier || '',
+                cnpj: doc.identifier || '',
+                valor: Number(doc.value) || 0,
+                tipo_financeiro: doc.financeType || '',
+                data_envio: doc.dateSent || new Date().toISOString().split('T')[0],
+                data_vencimento: doc.datePayment || null,
+                numero_nota: doc.invoiceNumber || '',
+                tags: Array.isArray(doc.tags) ? doc.tags : [],
+                email_assinante: doc.email || '',
+                nome_arquivo: doc.name,
+                status: doc.status || 'Pendente Assinatura'
+            };
+        }
+
+        function createSignatureLink(docId) {
+            if (docId === undefined || docId === null) return '';
+            return `${window.location.origin}/sign.html?docId=${encodeURIComponent(docId)}`;
+        }
+
+        async function fetchBackendGedDocuments() {
+            try {
+                const result = await apiFetch('/ged/documentos');
+                if (Array.isArray(result.documentos)) {
+                    return result.documentos.map(mapBackendDocToClientDoc);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar documentos GED do backend:', error);
+            }
+            return null;
+        }
+
+        async function initializeGedDocuments() {
+            try {
+                // Tenta carregar do backend primeiro
+                const backendDocs = await fetchBackendGedDocuments();
+                if (backendDocs && backendDocs.length > 0) {
+                    dbDocuments = backendDocs;
+                    saveGedDocuments(); // Salva como fallback
+                    return;
+                }
+            } catch (error) {
+                console.warn('Erro ao carregar do backend, usando localStorage como fallback:', error.message);
+            }
+            
+            // Fallback: carrega do localStorage
+            const localDocs = loadSavedDocuments();
+            if (localDocs && localDocs.length > 0) {
+                dbDocuments = localDocs;
+                return;
+            }
+            
+            // Fallback final: usa dados padrão
+            dbDocuments = loadSavedDocuments();
+        }
+
+        // ========== FUNÇÕES DE RELATÓRIO FINANCEIRO ==========
+
+        // Calcula e atualiza os KPIs financeiros
+        function updateFinancialKPIs() {
+            const totalBalance = cashFlowData.reduce((sum, item) => sum + (item.type === "Receita" ? item.value : -item.value), 0);
+            const monthlyIncome = cashFlowData.filter(item => item.type === "Receita").reduce((sum, item) => sum + item.value, 0);
+            const monthlyExpense = cashFlowData.filter(item => item.type === "Despesa").reduce((sum, item) => sum + item.value, 0);
+            const quarterlyProjection = (monthlyIncome * 3) - (monthlyExpense * 2.5); // Projeção conservadora
+
+            const totalBalanceEl = document.getElementById('totalBalance');
+            if (totalBalanceEl) totalBalanceEl.innerText = formatCurrency(totalBalance);
+            
+            const monthlyIncomeEl = document.getElementById('monthlyIncome');
+            if (monthlyIncomeEl) monthlyIncomeEl.innerText = formatCurrency(monthlyIncome);
+            
+            const monthlyExpenseEl = document.getElementById('monthlyExpense');
+            if (monthlyExpenseEl) monthlyExpenseEl.innerText = formatCurrency(monthlyExpense);
+            
+            const quarterlyProjectionEl = document.getElementById('quarterlyProjection');
+            if (quarterlyProjectionEl) quarterlyProjectionEl.innerText = formatCurrency(quarterlyProjection);
+
+            // Análise de Saúde Financeira
+            updateHealthAnalysis(totalBalance, monthlyIncome, monthlyExpense);
+        }
+
+        // Formata valores para moeda brasileira
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        }
+
+        // Análise de Saúde Financeira
+        function updateHealthAnalysis(balance, income, expense) {
+            const ratio = expense > 0 ? income / expense : 0;
+            const topSector = getTopExpenseSector();
+            let healthMessage = "";
+
+            if (ratio > 1.2) {
+                healthMessage = "✅ Saldo positivo. Receitas superam despesas em 20%. Excelente saúde financeira!";
+            } else if (ratio > 1) {
+                healthMessage = "✅ Saldo positivo. Receitas acompanham despesas. Projeção favorável para próximo trimestre.";
+            } else if (ratio > 0.9) {
+                healthMessage = "⚠️ Saldo equilibrado. Atenção: despesas quase igualam receitas. Recomenda-se revisão orçamentária.";
+            } else {
+                healthMessage = "🔴 Saldo negativo. Despesas excedem receitas. Implementar medidas de controle de custos.";
+            }
+
+            const healthStatusEl = document.getElementById('healthStatus');
+            if (healthStatusEl) healthStatusEl.innerText = healthMessage;
+            
+            const topCostCenterEl = document.getElementById('topCostCenter');
+            if (topCostCenterEl) topCostCenterEl.innerText = `${topSector.sector} apresenta a maior despesa consolidada com ${topSector.percentage.toFixed(1)}% do orçamento mensal.`;
+            
+            const economyTargetEl = document.getElementById('economyTarget');
+            if (economyTargetEl) {
+                const economyPercent = expense > 0 ? (((income - expense) / expense) * 100) : 0;
+                economyTargetEl.innerText = `Reduzir despesas em 5% nos próximos 3 meses. Meta atual: ${economyPercent.toFixed(1)}% alcançada.`;
+            }
+        }
+
+        // Identifica maior centro de custo
+        function getTopExpenseSector() {
+            const sectors = {};
+            cashFlowData.forEach(item => {
+                if (item.type === "Despesa") {
+                    sectors[item.sector] = (sectors[item.sector] || 0) + item.value;
+                }
+            });
+
+            let maxSector = Object.keys(sectors)[0];
+            let maxValue = sectors[maxSector];
+            let totalExpense = Object.values(sectors).reduce((a, b) => a + b, 0);
+
+            Object.keys(sectors).forEach(key => {
+                if (sectors[key] > maxValue) {
+                    maxSector = key;
+                    maxValue = sectors[key];
+                }
+            });
+
+            return {
+                sector: maxSector,
+                value: maxValue,
+                percentage: (maxValue / totalExpense) * 100
+            };
+        }
+
+        // Renderiza tabela de fluxo de caixa
+        function renderCashFlowTable(dataToRender = cashFlowData) {
+            const tbody = document.getElementById('cashFlowTableBody');
+            if (!tbody) {
+                console.warn('Elemento cashFlowTableBody não encontrado');
+                return;
+            }
+            tbody.innerHTML = "";
+            updateCashFlowSummary(dataToRender);
+
+            if (dataToRender.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400 bg-gray-50"><i data-lucide="inbox" class="mx-auto mb-2 w-8 h-8"></i>Nenhuma transação localizada para os filtros aplicados.</td></tr>`;
+                lucide.createIcons();
+                return;
+            }
+
+            let accumulatedBalance = 0;
+            dataToRender.forEach(item => {
+                accumulatedBalance += item.type === "Receita" ? item.value : -item.value;
+                const rowClass = item.type === "Receita" ? "bg-green-50" : "bg-red-50";
+                const valueClass = item.type === "Receita" ? "text-green-600 font-bold" : "text-red-600 font-bold";
+                const balanceClass = accumulatedBalance >= 0 ? "text-green-600 font-bold" : "text-red-600 font-bold";
+
+                tbody.innerHTML += `
+                    <tr class="${rowClass} hover:opacity-75 transition">
+                        <td class="p-3 border border-slate-200 font-semibold text-gray-900 whitespace-nowrap">${escapeHTML(item.date)}</td>
+                        <td class="p-3 border border-slate-200 text-gray-700 whitespace-normal">${escapeHTML(item.description)}</td>
+                        <td class="p-3 border border-slate-200 whitespace-nowrap">
+                            <span class="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded inline-block">${escapeHTML(item.sector)}</span>
+                        </td>
+                        <td class="p-3 border border-slate-200 whitespace-nowrap">
+                            <span class="text-xs font-semibold ${item.type === "Receita" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"} px-2 py-1 rounded inline-block">
+                                ${escapeHTML(item.type)}
+                            </span>
+                        </td>
+                        <td class="p-3 border border-slate-200 text-right ${valueClass} whitespace-nowrap">${formatCurrency(item.value)}</td>
+                        <td class="p-3 border border-slate-200 text-right ${balanceClass} whitespace-nowrap">${formatCurrency(accumulatedBalance)}</td>
+                        <td class="p-3 border border-slate-200 text-center">
+                            <div class="flex flex-col gap-1 sm:flex-row sm:justify-center sm:gap-2">
+                                <button type="button" onclick="editCashFlowEntry(${item.id})" class="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-1 rounded-lg hover:bg-blue-200 transition whitespace-nowrap">Editar</button>
+                                <button type="button" onclick="deleteCashFlowEntry(${item.id})" class="text-xs font-semibold bg-red-100 text-red-700 px-2 py-1 rounded-lg hover:bg-red-200 transition whitespace-nowrap">Excluir</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            lucide.createIcons();
+        }
+
+        // Filtro de dados financeiros
+        function applyFinancialFilters() {
+            const month = document.getElementById('filterMonth').value;
+            const sector = document.getElementById('filterSector').value;
+            const type = document.getElementById('filterType').value;
+
+            const filtered = cashFlowData.filter(item => {
+                let monthMatch = true;
+                if (month !== "todos") {
+                    const monthNames = {
+                        "janeiro": "01", "fevereiro": "02", "marco": "03",
+                        "abril": "04", "maio": "05", "junho": "06"
+                    };
+                    monthMatch = item.date.includes("/" + monthNames[month] + "/");
+                }
+
+                const sectorMatch = sector ? item.sector === sector : true;
+                const typeMatch = type ? item.type === type : true;
+
+                return monthMatch && sectorMatch && typeMatch;
+            });
+
+            renderCashFlowTable(filtered);
+        }
+
+        let monthlyFlowChartInstance;
+        let departmentChartInstance;
+
+        function getMonthlyFlowData(monthsCount = 6) {
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const today = new Date();
+            const labels = [];
+            const income = [];
+            const expense = [];
+
+            for (let offset = monthsCount - 1; offset >= 0; offset--) {
+                const date = new Date(today.getFullYear(), today.getMonth() - offset, 1);
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = String(date.getFullYear());
+                const monthLabel = monthNames[date.getMonth()];
+                const monthKey = `${month}/${year}`;
+
+                labels.push(monthLabel);
+
+                const monthItems = cashFlowData.filter(item => {
+                    const parts = item.date.split('/');
+                    return parts.length === 3 && parts[1] === month && parts[2] === year;
+                });
+
+                income.push(monthItems.filter(item => item.type === 'Receita').reduce((sum, item) => sum + item.value, 0));
+                expense.push(monthItems.filter(item => item.type === 'Despesa').reduce((sum, item) => sum + item.value, 0));
+            }
+
+            return { labels, income, expense };
+        }
+
+        // Gráfico de Fluxo Mensal
+        function createMonthlyFlowChart() {
+            const ctx = document.getElementById('monthlyFlowChart').getContext('2d');
+            const flowData = getMonthlyFlowData();
+
+            monthlyFlowChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: flowData.labels,
+                    datasets: [
+                        {
+                            label: 'Receitas',
+                            data: flowData.income,
+                            backgroundColor: '#10b981',
+                            borderRadius: 5
+                        },
+                        {
+                            label: 'Despesas',
+                            data: flowData.expense,
+                            backgroundColor: '#ef4444',
+                            borderRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateMonthlyFlowChart() {
+            if (!monthlyFlowChartInstance) return;
+            const flowData = getMonthlyFlowData();
+            monthlyFlowChartInstance.data.labels = flowData.labels;
+            monthlyFlowChartInstance.data.datasets[0].data = flowData.income;
+            monthlyFlowChartInstance.data.datasets[1].data = flowData.expense;
+            monthlyFlowChartInstance.update();
+        }
+
+        // Gráfico de Distribuição por Setor
+        function createDepartmentChart() {
+            const ctx = document.getElementById('departmentChart').getContext('2d');
+            
+            const sectors = ["TI Infra", "RH / DP", "Acadêmico", "Financeiro"];
+            const expenses = [24500, 54000, 16500, 3350];
+            const colors = ['#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b'];
+
+            departmentChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: sectors,
+                    datasets: [{
+                        data: expenses,
+                        backgroundColor: colors,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return context.label + ': R$ ' + context.parsed.toLocaleString('pt-BR') + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateDepartmentChart() {
+            if (!departmentChartInstance) return;
+
+            const sectors = ["TI Infra", "RH / DP", "Acadêmico", "Financeiro"];
+            const expenses = sectors.map(sector => {
+                return cashFlowData
+                    .filter(item => item.sector === sector && item.type === "Despesa")
+                    .reduce((sum, item) => sum + item.value, 0);
+            });
+
+            departmentChartInstance.data.datasets[0].data = expenses;
+            departmentChartInstance.update();
+        }
+
+        // Exportar para CSV
+        function exportToCSV() {
+            const header = "Data;Descrição;Centro de Custo;Tipo;Valor;Saldo Acumulado\n";
+            let csv = '\ufeff' + header;
+            let accumulatedBalance = 0;
+
+            cashFlowData.forEach(item => {
+                accumulatedBalance += item.type === "Receita" ? item.value : -item.value;
+                const valueText = formatCurrency(item.value);
+                const balanceText = formatCurrency(accumulatedBalance);
+                csv += `"${item.date}";"${item.description}";"${item.sector}";"${item.type}";"${valueText}";"${balanceText}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = 'fluxo_caixa_' + new Date().toLocaleDateString('pt-BR').replace(/\//g, '-') + '.csv';
+            link.click();
+
+            showToast("Exportação Realizada", "Arquivo CSV gerado com sucesso!");
+        }
+
+        // Imprimir relatório
+        function printReport() {
+            window.print();
+        }
+
+        function toggleTransactionEditor() {
+            const editor = document.getElementById('transactionEditor');
+            editor.classList.toggle('hidden');
+        }
+
+        function addTransaction() {
+            const date = document.getElementById('newTransactionDate').value;
+            const description = document.getElementById('newTransactionDescription').value.trim();
+            const sector = document.getElementById('newTransactionSector').value;
+            const type = document.getElementById('newTransactionType').value;
+            const value = parseFloat(document.getElementById('newTransactionValue').value);
+
+            if (!date || !description || !sector || !type || Number.isNaN(value)) {
+                showToast("Preenchimento Obrigatório", "Informe data, descrição, centro de custo, tipo e valor.", "bg-red-700");
+                return;
+            }
+
+            if (currentTransactionId !== null) {
+                const txIndex = cashFlowData.findIndex(item => item.id === currentTransactionId);
+                if (txIndex !== -1) {
+                    cashFlowData[txIndex] = {
+                        ...cashFlowData[txIndex],
+                        date,
+                        description,
+                        sector,
+                        type,
+                        value
+                    };
+                    showToast("Lançamento Atualizado", "O lançamento foi atualizado com sucesso.", "bg-green-700");
+                }
+                currentTransactionId = null;
+                document.getElementById('addTransactionButton').innerText = 'Salvar lançamento';
+            } else {
+                const nextId = cashFlowData.reduce((max, item) => Math.max(max, item.id || 0), 0) + 1;
+                cashFlowData.push({ id: nextId, date, description, sector, type, value, balance: 0 });
+                showToast("Lançamento Adicionado", "O novo lançamento foi incluído no fluxo de caixa.", "bg-green-700");
+            }
+
+            renderCashFlowTable();
+            updateFinancialKPIs();
+            updateDepartmentChart();
+            updateMonthlyFlowChart();
+
+            document.getElementById('newTransactionDate').value = "";
+            document.getElementById('newTransactionDescription').value = "";
+            document.getElementById('newTransactionValue').value = "";
+            
+            // Fechar o editor após salvar
+            toggleTransactionEditor();
+        }
+
+        function editCashFlowEntry(id) {
+            const tx = cashFlowData.find(item => item.id === id);
+            if (!tx) return;
+            currentTransactionId = id;
+            document.getElementById('newTransactionDate').value = tx.date;
+            document.getElementById('newTransactionDescription').value = tx.description;
+            document.getElementById('newTransactionSector').value = tx.sector;
+            document.getElementById('newTransactionType').value = tx.type;
+            document.getElementById('newTransactionValue').value = tx.value;
+            document.getElementById('addTransactionButton').innerText = 'Atualizar lançamento';
+            if (document.getElementById('transactionEditor').classList.contains('hidden')) {
+                document.getElementById('transactionEditor').classList.remove('hidden');
+            }
+        }
+
+        function deleteCashFlowEntry(id) {
+            cashFlowData = cashFlowData.filter(item => item.id !== id);
+            renderCashFlowTable();
+            updateFinancialKPIs();
+            updateDepartmentChart();
+            updateMonthlyFlowChart();
+            showToast("Lançamento Excluído", "O lançamento foi removido com sucesso.", "bg-red-700");
+        }
+
+        function syncDocumentToCashFlow(doc) {
+            const existingTxIndex = cashFlowData.findIndex(item => item.sourceDocId === doc.id);
+            const transactionDate = doc.datePayment || doc.dateSent || doc.date || new Date().toLocaleDateString('pt-BR');
+            const description = `${doc.type} - ${doc.invoiceNumber || doc.identifier || doc.name}`;
+            const value = parseFloat(doc.value) || 0;
+            const entry = {
+                date: transactionDate,
+                description,
+                sector: doc.sector,
+                type: doc.financeType || "Despesa",
+                value,
+                balance: 0,
+                sourceDocId: doc.id
+            };
+
+            if (existingTxIndex !== -1) {
+                cashFlowData[existingTxIndex] = { ...cashFlowData[existingTxIndex], ...entry };
+            } else {
+                cashFlowData.push(entry);
+            }
+
+            renderCashFlowTable();
+            updateFinancialKPIs();
+            updateDepartmentChart();
+            updateMonthlyFlowChart();
+        }
+
+        function removeCashFlowEntryForDocument(docId) {
+            cashFlowData = cashFlowData.filter(item => item.sourceDocId !== docId);
+        }
+
+        function updateCashFlowSummary(dataToRender = cashFlowData) {
+            const totalEntries = dataToRender.filter(item => item.type === "Receita").reduce((sum, item) => sum + item.value, 0);
+            const totalExits = dataToRender.filter(item => item.type === "Despesa").reduce((sum, item) => sum + item.value, 0);
+            const currentBalance = totalEntries - totalExits;
+
+            const totalEntriesEl = document.getElementById('totalEntries');
+            if (totalEntriesEl) totalEntriesEl.innerText = formatCurrency(totalEntries);
+            
+            const totalExitsEl = document.getElementById('totalExits');
+            if (totalExitsEl) totalExitsEl.innerText = formatCurrency(totalExits);
+            
+            const currentBalanceEl = document.getElementById('currentCashBalance');
+            if (currentBalanceEl) currentBalanceEl.innerText = formatCurrency(currentBalance);
+        }
+
+        // Atualiza o nome do arquivo selecionado na Dropzone
+        function updateFileName() {
+            const input = document.getElementById('fileInput');
+            const display = document.getElementById('fileNameDisplay');
+            if(input.files.length > 0) {
+                display.innerText = input.files[0].name;
+                display.classList.add('text-blue-900', 'font-semibold');
+            }
+        }
+
+        // Renderiza a tabela de documentos na tela
+        function renderTable(dataToRender = dbDocuments) {
+            const tbody = document.getElementById('documentTableBody');
+            if (!tbody) {
+                console.warn('Elemento documentTableBody não encontrado');
+                return;
+            }
+            tbody.innerHTML = "";
+            
+            const docCounterEl = document.getElementById('docCounter');
+            if (docCounterEl) {
+                docCounterEl.innerText = `${dataToRender.length} Documento(s)`;
+            }
+
+            if(dataToRender.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400 bg-gray-50"><i data-lucide="database-zap" class="mx-auto mb-2 w-8 h-8"></i>Nenhum documento localizado no OCR ou metadados.</td></tr>`;
+                lucide.createIcons();
+                return;
+            }
+
+            dataToRender.forEach(doc => {
+                const badgeColor = doc.status === "Assinado & Arquivado" ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800 animate-pulse";
+                const iconStatus = doc.status === "Assinado & Arquivado" ? "check-circle" : "clock";
+                
+                // Formatação monetária básica
+                const formattedValue = parseFloat(doc.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-4">
+                            <div class="flex items-start space-x-3">
+                                <i data-lucide="file-text" class="text-blue-900 w-5 h-5 mt-0.5 shrink-0"></i>
+                                <div>
+                                    <span class="font-bold text-gray-900 block max-w-xs truncate">${doc.name}</span>
+                                    <span class="text-xs text-gray-500 block">ID/Ref: ${doc.identifier}</span>
+                                    <span class="text-[11px] text-gray-400 block">Criado em: ${doc.date}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                            <span class="text-xs font-semibold bg-gray-200 text-gray-700 px-2 py-0.5 rounded">${doc.type}</span>
+                            <div class="text-xs font-medium text-gray-500 mt-1">${doc.sector}</div>
+                            <div class="text-xs text-slate-500 mt-2">${(doc.tags || []).map(tag => `<span class=\"inline-flex items-center px-2 py-1 rounded-full bg-blue-50 text-blue-800 mr-1 mb-1\">${tag}</span>`).join('')}</div>
+                            <div class="text-xs font-bold text-gray-900">${formattedValue}</div>
+                        </td>
+                        <td class="p-4">
+                            <div class="text-xs font-medium text-gray-900">${doc.email}</div>
+                            <div class="text-[11px] text-gray-500 mt-0.5 flex items-center space-x-1">
+                                <span class="bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">${doc.flow}</span>
+                                <span class="bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100">${doc.security}</span>
+                            </div>
+                        </td>
+                        <td class="p-4">
+                            <span class="px-2.5 py-1 inline-flex items-center space-x-1 rounded-full text-xs font-semibold ${badgeColor}">
+                                <i data-lucide="${iconStatus}" class="w-3 h-3"></i>
+                                <span>${doc.status}</span>
+                            </span>
+                        </td>
+                        <td class="p-4 text-center">
+                            <div class="flex items-center justify-center space-x-1">
+                                <span class="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-mono font-bold" title="Controle de Versão do GED">v${doc.version}</span>
+                                <button onclick="viewDocument(${doc.id})" class="text-blue-900 hover:text-blue-600 p-1 rounded transition" title="Visualizar Documento">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="editDocument(${doc.id})" class="text-green-900 hover:text-green-600 p-1 rounded transition" title="Editar Documento">
+                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="simulateSigning(${doc.id})" class="text-orange-600 hover:text-orange-700 p-1 rounded transition" title="Assinar/Aprovar via Link de E-mail">
+                                    <i data-lucide="pen-tool" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="deleteDocument(${doc.id})" class="text-red-600 hover:text-red-700 p-1 rounded transition" title="Excluir Documento">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            // Recarrega os ícones da biblioteca instalada
+            lucide.createIcons();
+        }
+
+        // Submissão do Formulário - Processo completo de indexação e envio do Sign por e-mail
+        document.getElementById('gedForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('fileInput');
+            const docType = document.getElementById('docType').value;
+            const sector = document.getElementById('sector').value;
+            const identifier = document.getElementById('identifier').value;
+            const docValue = document.getElementById('docValue').value;
+            const signerEmail = document.getElementById('signerEmail').value;
+            const flowType = document.getElementById('flowType').value;
+            const authType = document.getElementById('authType').value;
+            const dateDocSent = document.getElementById('dateDocSent').value;
+            const datePayment = document.getElementById('datePayment').value;
+            const invoiceNumber = document.getElementById('invoiceNumber').value;
+            const additionalEmails = getAdditionalEmails();
+
+            // Validação de campos obrigatórios
+            if (!fileInput.files.length) {
+                showToast("Arquivo Obrigatório", "Por favor, selecione um documento para enviar.", "bg-red-700");
+                return;
+            }
+
+            if (!dateDocSent) {
+                showToast("Data Obrigatória", "Por favor, informe a data de envio.", "bg-red-700");
+                return;
+            }
+
+            const newDoc = {
+                name: fileInput.files[0] ? fileInput.files[0].name : "Documento_Indexado.pdf",
+                type: docType,
+                sector: sector,
+                identifier: identifier,
+                value: docValue,
+                financeType: document.getElementById('docFinanceType').value,
+                email: signerEmail,
+                additionalEmails: additionalEmails,
+                flow: flowType,
+                security: authType,
+                status: "Pendente Assinatura",
+                version: 1,
+                date: new Date().toLocaleDateString('pt-BR'),
+                dateSent: dateDocSent,
+                datePayment: datePayment || null,
+                invoiceNumber: invoiceNumber || null,
+                tags: getDocTags(),
+                attachments: []
+            };
+
+            let signatureLink = '';
+            try {
+                const payload = prepareDocumentPayload(newDoc);
+                const response = await apiFetch('/ged/documentos', {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                const saved = response.documento ? mapBackendDocToClientDoc(response.documento) : null;
+                if (saved) {
+                    saved.flow = newDoc.flow;
+                    saved.security = newDoc.security;
+                    saved.additionalEmails = newDoc.additionalEmails;
+                    saved.version = newDoc.version;
+                    saved.signatureLink = createSignatureLink(saved.id);
+                    saved.signature = saved.signature || null;
+                    dbDocuments.unshift(saved);
+                } else {
+                    const fallbackDoc = { ...newDoc, id: dbDocuments.length + 1 };
+                    fallbackDoc.signatureLink = createSignatureLink(fallbackDoc.id);
+                    fallbackDoc.signature = null;
+                    dbDocuments.unshift(fallbackDoc);
+                }
+                saveGedDocuments();
+                renderTable();
+                syncDocumentToCashFlow(dbDocuments[0]);
+                signatureLink = dbDocuments[0].signatureLink || createSignatureLink(dbDocuments[0].id);
+                dbDocuments[0].signatureLink = signatureLink;
+                saveGedDocuments();
+            } catch (error) {
+                console.error('Erro ao criar documento GED:', error);
+                showToast('Erro', 'Falha ao salvar documento no backend. Tente novamente.', 'bg-red-700');
+                return;
+            }
+            
+            // Reseta formulário e UI de upload
+            document.getElementById('gedForm').reset();
+            document.getElementById('fileNameDisplay').innerText = "Arraste ou clique para anexar";
+            document.getElementById('fileNameDisplay').classList.remove('text-blue-900', 'font-semibold');
+            
+            // Limpa destinatários adicionais
+            document.getElementById('additionalRecipientsContainer').innerHTML = '';
+            additionalRecipients = [];
+            updateRecipientCounter();
+            
+            // Limpa tags do documento
+            resetDocTags();
+
+            // Define data padrão para próximo envio
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateDocSent').value = today;
+
+            // Compila lista de destinatários
+            const recipientList = [signerEmail, ...additionalEmails].join(', ');
+            const recipientCount = additionalEmails.length + 1;
+
+            // Dispara Toast de sucesso do workflow de e-mail
+            showToast(
+                "Workflow Iniciado!",
+                `Link de assinatura eletrônico enviado para ${recipientCount} destinatário(s). Acesse: ${signatureLink}`
+            );
+
+        });
+
+        // Filtro de Busca OCR e Metadados Inteligente
+        function filterDocuments() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = dbDocuments.filter(doc => {
+                const tagMatch = doc.tags ? doc.tags.some(tag => tag.toLowerCase().includes(query)) : false;
+            return doc.name.toLowerCase().includes(query) || 
+                       doc.type.toLowerCase().includes(query) ||
+                       doc.sector.toLowerCase().includes(query) ||
+                       doc.identifier.toLowerCase().includes(query) ||
+                       doc.email.toLowerCase().includes(query) ||
+                       tagMatch;
+            });
+            renderTable(filtered);
+        }
+
+        // Simulação de Assinatura Eletrônica (Como se a pessoa clicasse no e-mail recebido)
+        function simulateSigning(id) {
+            const docIndex = dbDocuments.findIndex(d => d.id === id);
+            if(docIndex !== -1) {
+                const document = dbDocuments[docIndex];
+                if(document.status === "Assinado & Arquivado") {
+                    showToast("Documento Já Assinado", "Este arquivo já completou o workflow e encontra-se seguro na nuvem.", "bg-blue-900");
+                    return;
+                }
+                document.signatureLink = document.signatureLink || createSignatureLink(document.id);
+                saveGedDocuments();
+                window.location.href = document.signatureLink;
+            }
+        }
+
+        // ========== FUNÇÕES DE GERENCIAMENTO DE DESTINATÁRIOS ==========
+
+        // Array para armazenar destinatários adicionais
+        let additionalRecipients = [];
+        let currentDocTags = [];
+
+        // Adiciona tag de documento à lista de envio
+        function addDocTagToList() {
+            const input = document.getElementById('docTagInput');
+            const value = input.value.trim();
+            if (!value) return;
+            const tags = value.split(',').map(tag => tag.trim()).filter(Boolean);
+            tags.forEach(tag => {
+                if (!currentDocTags.includes(tag)) {
+                    currentDocTags.push(tag);
+                }
+            });
+            input.value = '';
+            renderDocTagList();
+        }
+
+        function renderDocTagList() {
+            const container = document.getElementById('docTagList');
+            container.innerHTML = '';
+            currentDocTags.forEach((tag, index) => {
+                container.innerHTML += `
+                    <div class="inline-flex items-center gap-2 rounded-full bg-blue-100 text-blue-900 px-3 py-1 text-xs font-semibold">
+                        <span>${tag}</span>
+                        <button type="button" onclick="removeDocTag(${index})" class="text-blue-700 hover:text-blue-900"><i data-lucide="x" class="w-3 h-3"></i></button>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function removeDocTag(index) {
+            currentDocTags.splice(index, 1);
+            renderDocTagList();
+        }
+
+        function getDocTags() {
+            return currentDocTags.slice();
+        }
+
+        function resetDocTags() {
+            currentDocTags = [];
+            renderDocTagList();
+        }
+
+        // Adiciona campo de destinatário
+        function addRecipientField() {
+            if (additionalRecipients.length >= 5) {
+                showToast("Limite Atingido", "Máximo de 5 destinatários adicionais permitido.", "bg-amber-700");
+                return;
+            }
+
+            const index = additionalRecipients.length + 1;
+            const recipientId = `recipient_${index}`;
+            const container = document.getElementById('additionalRecipientsContainer');
+
+            const field = document.createElement('div');
+            field.className = 'flex items-center space-x-1.5';
+            field.id = recipientId;
+            field.innerHTML = `
+                <input type="email" placeholder="Email destinatário ${index}" class="flex-1 border border-orange-200 rounded p-1.5 text-xs focus:ring-2 focus:ring-orange-500 outline-none bg-white" required>
+                <button type="button" onclick="removeRecipientField('${recipientId}')" class="text-red-500 hover:text-red-700 p-1 rounded transition">
+                    <i data-lucide="x" class="w-3 h-3"></i>
+                </button>
+            `;
+
+            container.appendChild(field);
+            additionalRecipients.push({ id: recipientId, email: '' });
+            updateRecipientCounter();
+            lucide.createIcons();
+        }
+
+        // Remove campo de destinatário
+        function removeRecipientField(recipientId) {
+            const field = document.getElementById(recipientId);
+            if (field) {
+                field.remove();
+                additionalRecipients = additionalRecipients.filter(r => r.id !== recipientId);
+                updateRecipientCounter();
+            }
+        }
+
+        // Atualiza contador de destinatários
+        function updateRecipientCounter() {
+            const counter = document.getElementById('recipientCounter');
+            counter.innerText = `${additionalRecipients.length}/5`;
+        }
+
+        // Coleta os e-mails dos destinatários adicionais
+        function getAdditionalEmails() {
+            const container = document.getElementById('additionalRecipientsContainer');
+            const inputs = container.querySelectorAll('input[type="email"]');
+            const emails = [];
+            inputs.forEach(input => {
+                if (input.value.trim()) {
+                    emails.push(input.value.trim());
+                }
+            });
+            return emails;
+        }
+
+        // ========== FUNÇÕES DE AÇÃO DE DOCUMENTOS ==========
+
+        // Estado do documento atualmente aberto no modal
+        let currentModalDocumentId = null;
+
+        // Visualiza documento em modal interno e carrega anexos do backend
+        async function fetchDocumentAttachments(documentId) {
+            try {
+                const result = await apiFetch(`/ged/documentos/${documentId}/anexos`);
+                return Array.isArray(result.anexos) ? result.anexos : [];
+            } catch (error) {
+                console.error('Erro ao carregar anexos:', error);
+                return [];
+            }
+        }
+
+        async function viewDocument(id) {
+            const doc = dbDocuments.find(d => d.id === id);
+            if (doc) {
+                currentModalDocumentId = id;
+                const attachments = await fetchDocumentAttachments(id);
+                openDocumentModal('view', { ...doc, attachments });
+                showToast("Visualização", `Visualizando: ${doc.name}`, "bg-blue-900");
+            }
+        }
+
+        // Edita documento em modal interno
+        function editDocument(id) {
+            const doc = dbDocuments.find(d => d.id === id);
+            if (doc) {
+                currentModalDocumentId = id;
+                openDocumentModal('edit', doc);
+                showToast("Edição", `Editando: ${doc.name}`, "bg-green-900");
+            }
+        }
+
+        function openDocumentModal(mode, doc) {
+            const modal = document.getElementById('documentModal');
+            const title = document.getElementById('documentModalTitle');
+            const subtitle = document.getElementById('documentModalSubtitle');
+            const content = document.getElementById('documentModalContent');
+            const footer = document.getElementById('documentModalFooter');
+
+            title.innerText = mode === 'view' ? 'Visualizar Documento' : 'Editar Documento';
+            subtitle.innerText = doc.name;
+            content.innerHTML = '';
+            footer.innerHTML = '';
+
+            if (mode === 'view') {
+                content.innerHTML = renderDocumentViewContent(doc);
+                footer.innerHTML = `
+                    <button type="button" onclick="closeDocumentModal()" class="bg-blue-900 hover:bg-blue-800 text-white px-5 py-2.5 rounded font-semibold flex items-center space-x-2">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Voltar</span>
+                    </button>
+                `;
+            } else {
+                content.innerHTML = renderDocumentEditContent(doc);
+                footer.innerHTML = `
+                    <button type="button" onclick="closeDocumentModal(true)" class="bg-gray-600 hover:bg-gray-700 text-white px-5 py-2.5 rounded font-semibold flex items-center space-x-2">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                        <span>Sair</span>
+                    </button>
+                    <button type="button" onclick="saveDocumentChanges()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded font-semibold flex items-center space-x-2">
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                        <span>Salvar Alterações</span>
+                    </button>
+                `;
+            }
+
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeDocumentModal(confirmDiscard = false) {
+            if (confirmDiscard) {
+                const answer = confirm('Deseja descartar as alterações e fechar?');
+                if (!answer) return;
+            }
+            const modal = document.getElementById('documentModal');
+            modal.classList.add('hidden');
+            currentModalDocumentId = null;
+        }
+
+        function renderDocumentViewContent(doc) {
+            const formattedValue = parseFloat(doc.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const attachments = Array.isArray(doc.attachments) ? doc.attachments : [];
+            return `
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                            <p class="text-xs uppercase text-slate-500">Tipo de Documento</p>
+                            <p class="mt-2 font-semibold text-slate-900">${doc.type}</p>
+                        </div>
+                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                            <p class="text-xs uppercase text-slate-500">Centro de Custo</p>
+                            <p class="mt-2 font-semibold text-slate-900">${doc.sector}</p>
+                        </div>
+                        <div class="bg-green-50 border border-green-100 rounded-xl p-4">
+                            <p class="text-xs uppercase text-slate-500">Identificador</p>
+                            <p class="mt-2 font-semibold text-slate-900">${doc.identifier}</p>
+                        </div>
+                        <div class="bg-purple-50 border border-purple-100 rounded-xl p-4">
+                            <p class="text-xs uppercase text-slate-500">Valor</p>
+                            <p class="mt-2 font-semibold text-green-700">${formattedValue}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                            <p class="text-xs uppercase text-slate-500">Data de Envio</p>
+                            <p class="mt-2 font-semibold text-slate-900">${doc.dateSent}</p>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                            <p class="text-xs uppercase text-slate-500">Data de Pagamento</p>
+                            <p class="mt-2 font-semibold text-slate-900">${doc.datePayment || 'Não informada'}</p>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                            <p class="text-xs uppercase text-slate-500">Nota Fiscal</p>
+                            <p class="mt-2 font-semibold text-slate-900">${doc.invoiceNumber || 'Não informado'}</p>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                            <p class="text-xs uppercase text-slate-500">Status</p>
+                            <p class="mt-2 font-semibold ${doc.status === 'Assinado & Arquivado' ? 'text-green-700' : 'text-amber-700'}">${doc.status}</p>
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-slate-200 p-4 bg-slate-50">
+                        <p class="text-xs uppercase text-slate-500 mb-2">E-mail do Signatário</p>
+                        <p class="font-medium text-slate-900">${doc.email}</p>
+                        ${doc.additionalEmails && doc.additionalEmails.length ? `<p class="text-xs uppercase text-slate-500 mt-4 mb-2">Destinatários Adicionais</p><div class="flex flex-wrap gap-2">${doc.additionalEmails.map(email => `<span class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-sm">${email}</span>`).join('')}</div>` : ''}
+                    </div>
+                    <div class="rounded-xl border border-slate-200 p-4 bg-slate-50 space-y-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <p class="text-xs uppercase text-slate-500">Anexos do Documento</p>
+                                <p class="text-sm text-slate-600">Adicione novos arquivos diretamente ao documento.</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="triggerAttachmentUpload()" class="inline-flex items-center gap-2 rounded-full bg-blue-900 text-white px-3 py-2 text-xs font-semibold hover:bg-blue-800 transition">
+                                    <i data-lucide="upload" class="w-4 h-4"></i>
+                                    Adicionar anexo
+                                </button>
+                                <input type="file" id="modalAttachmentInput" class="hidden" onchange="handleAttachmentFileChange(event)" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-slate-200 p-4 bg-slate-50 space-y-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <p class="text-xs uppercase text-slate-500">Assinatura Eletrônica</p>
+                                <p class="text-sm text-slate-600">Registre os dados do signatário ou abra o link de assinatura.</p>
+                            </div>
+                        </div>
+                        ${doc.signature ? `
+                            <div class="rounded-2xl bg-white border border-slate-200 p-4 space-y-2">
+                                <p class="text-sm font-semibold text-slate-900">Assinatura registrada</p>
+                                <p class="text-sm text-slate-700">Nome: ${doc.signature.name}</p>
+                                <p class="text-sm text-slate-700">CPF: ${doc.signature.cpf}</p>
+                                <p class="text-sm text-slate-700">Função: ${doc.signature.funcao}</p>
+                                <p class="text-sm text-slate-700">Local, Data e Hora: ${doc.signature.local}, ${doc.signature.dateTime}</p>
+                                <p class="text-xs text-slate-500">Descrição: ${doc.signature.description}</p>
+                            </div>
+                        ` : `
+                            <div class="rounded-2xl bg-white border border-slate-200 p-4 space-y-3">
+                                <p class="text-sm text-slate-700">Link de assinatura gerado para este documento.</p>
+                                ${doc.signatureLink ? `<a href="${doc.signatureLink}" target="_blank" class="text-blue-900 font-semibold underline">Abrir link de assinatura</a>` : `<span class="text-xs text-slate-400">Nenhum link de assinatura disponível.</span>`}
+                            </div>
+                        `}
+                    </div>
+                    <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-100 p-8 text-center">
+                        <i data-lucide="file-text" class="mx-auto w-12 h-12 text-slate-400 mb-3"></i>
+                        <p class="text-base font-semibold text-slate-900">Preview de documento</p>
+                        <p class="mt-2 text-sm text-slate-500">Documento enviado: <strong>${doc.name}</strong></p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function triggerAttachmentUpload() {
+            const input = document.getElementById('modalAttachmentInput');
+            if (input) {
+                input.value = '';
+                input.click();
+            }
+        }
+
+        function handleAttachmentFileChange(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(loadEvent) {
+                const dataUrl = loadEvent.target.result;
+                saveAttachmentToDocument(currentModalDocumentId, file, dataUrl);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function saveAttachmentToDocument(docId, file, dataUrl) {
+            const payload = {
+                nome_arquivo: file.name,
+                tipo_arquivo: file.type || 'application/octet-stream',
+                tamanho: `${Math.round(file.size / 1024)} KB`,
+                arquivo_base64: dataUrl
+            };
+
+            try {
+                const result = await apiFetch(`/ged/documentos/${docId}/anexos`, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                const attachment = result.anexo;
+                const docIndex = dbDocuments.findIndex(d => d.id === docId);
+                if (docIndex !== -1) {
+                    const currentDoc = dbDocuments[docIndex];
+                    currentDoc.attachments = Array.isArray(currentDoc.attachments) ? currentDoc.attachments : [];
+                    currentDoc.attachments.unshift(attachment);
+                    saveGedDocuments();
+                    openDocumentModal('view', { ...currentDoc, attachments: currentDoc.attachments });
+                } else {
+                    const attachments = await fetchDocumentAttachments(docId);
+                    openDocumentModal('view', { id: docId, attachments });
+                }
+                showToast('Anexo Adicionado', `Arquivo ${file.name} anexado ao documento com sucesso.`, 'bg-green-700');
+            } catch (error) {
+                console.error('Erro ao enviar anexo:', error);
+                showToast('Erro', 'Falha ao enviar anexo. Verifique o arquivo e tente novamente.', 'bg-red-700');
+            }
+        }
+
+        function downloadAttachment(docId, attachmentIndex) {
+            const doc = dbDocuments.find(d => d.id === docId);
+            if (!doc || !Array.isArray(doc.attachments)) return;
+            const attachment = doc.attachments[attachmentIndex];
+            if (!attachment) return;
+            const url = attachment.url_arquivo || attachment.dataUrl;
+            if (!url) return;
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function renderDocumentEditContent(doc) {
+            return `
+                <form id="modalEditForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Tipo de Documento</label>
+                            <input id="modalType" type="text" value="${doc.type}" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Centro de Custo</label>
+                            <input id="modalSector" type="text" value="${doc.sector}" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Identificador</label>
+                            <input id="modalIdentifier" type="text" value="${doc.identifier}" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Valor (R$)</label>
+                            <input id="modalValue" type="text" value="${doc.value}" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Data de Envio</label>
+                            <input id="modalDateSent" type="date" value="${doc.dateSent}" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs uppercase text-slate-500 mb-2 block">Data de Pagamento</label>
+                            <input id="modalDatePayment" type="date" value="${doc.datePayment || ''}" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs uppercase text-slate-500 mb-2 block">Número de Nota Fiscal</label>
+                        <input id="modalInvoiceNumber" type="text" value="${doc.invoiceNumber || ''}" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs uppercase text-slate-500 mb-2 block">E-mail do Signatário</label>
+                        <input id="modalSignerEmail" type="email" value="${doc.email}" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs uppercase text-slate-500 mb-2 block">Status</label>
+                        <select id="modalStatus" class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-green-500 outline-none">
+                            <option value="Pendente Assinatura" ${doc.status === 'Pendente Assinatura' ? 'selected' : ''}>Pendente Assinatura</option>
+                            <option value="Assinado & Arquivado" ${doc.status === 'Assinado & Arquivado' ? 'selected' : ''}>Assinado & Arquivado</option>
+                        </select>
+                    </div>
+                </form>
+            `;
+        }
+
+        async function saveDocumentChanges() {
+            if (currentModalDocumentId === null) return;
+            const docIndex = dbDocuments.findIndex(d => d.id === currentModalDocumentId);
+            if (docIndex === -1) return;
+
+            const updatedDoc = {
+                ...dbDocuments[docIndex],
+                type: document.getElementById('modalType').value,
+                sector: document.getElementById('modalSector').value,
+                identifier: document.getElementById('modalIdentifier').value,
+                value: document.getElementById('modalValue').value,
+                dateSent: document.getElementById('modalDateSent').value,
+                datePayment: document.getElementById('modalDatePayment').value || null,
+                invoiceNumber: document.getElementById('modalInvoiceNumber').value || null,
+                email: document.getElementById('modalSignerEmail').value,
+                status: document.getElementById('modalStatus').value,
+            };
+
+            try {
+                const payload = prepareDocumentPayload(updatedDoc);
+                const response = await apiFetch(`/ged/documentos/${currentModalDocumentId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(payload)
+                });
+                if (response.documento) {
+                    const saved = mapBackendDocToClientDoc(response.documento);
+                    saved.flow = updatedDoc.flow;
+                    saved.security = updatedDoc.security;
+                    saved.additionalEmails = updatedDoc.additionalEmails || dbDocuments[docIndex].additionalEmails;
+                    saved.version = updatedDoc.version || dbDocuments[docIndex].version;
+                    dbDocuments[docIndex] = saved;
+                } else {
+                    dbDocuments[docIndex] = updatedDoc;
+                }
+                saveGedDocuments();
+                syncDocumentToCashFlow(dbDocuments[docIndex]);
+                renderTable();
+                updateFinancialKPIs();
+                closeDocumentModal();
+                showToast('Documento Atualizado', `Documento ${updatedDoc.name} salvo com sucesso.`, 'bg-green-700');
+            } catch (error) {
+                console.error('Erro ao atualizar documento GED:', error);
+                showToast('Erro', 'Falha ao atualizar documento no backend. Tente novamente.', 'bg-red-700');
+            }
+        }
+
+        // Deleta documento
+        function deleteDocument(id) {
+            const doc = dbDocuments.find(d => d.id === id);
+            if (doc) {
+                if (confirm(`Tem certeza que deseja excluir o documento "${doc.name}"?`)) {
+                    dbDocuments = dbDocuments.filter(d => d.id !== id);
+                    removeCashFlowEntryForDocument(id);
+                    saveGedDocuments();
+                    renderTable();
+                    updateFinancialKPIs();
+                    updateMonthlyFlowChart();
+                    showToast("Documento Excluído", `${doc.name} foi removido com sucesso.`, "bg-red-700");
+                    
+                    // Tenta deletar no backend (assíncrono, não bloqueia)
+                    apiFetch(`/ged/documentos/${id}`, { method: 'DELETE' }).catch(error => {
+                        console.warn('Falha ao deletar no backend:', error);
+                    });
+                }
+            }
+        }
+
+        // Utilitário de Toast de Notificação
+        function showToast(title, msg, bgColor = "bg-gray-900") {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMsg').innerText = msg;
+            
+            toast.className = `fixed bottom-5 right-5 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transform opacity-100 translate-y-0 transition duration-300 pointer-events-auto z-50 ${bgColor}`;
+            
+            setTimeout(() => {
+                toast.classList.replace('opacity-100', 'opacity-0');
+                toast.classList.add('translate-y-20');
+            }, 5000);
+        }
+
+        // Executa a carga inicial da página
+        function highlightActiveTab() {
+            const currentPage = window.location.pathname.split('/').pop() || 'ged.html';
+            const navTabs = document.querySelectorAll('.nav-tab');
+            
+            navTabs.forEach(tab => {
+                if (tab.getAttribute('data-page') === currentPage.replace('.html', '')) {
+                    tab.classList.remove('bg-slate-100', 'text-slate-900', 'hover:bg-slate-200');
+                    tab.classList.add('bg-yellow-400', 'text-slate-900', 'font-bold');
+                } else {
+                    tab.classList.remove('bg-yellow-400', 'font-bold');
+                    tab.classList.add('bg-slate-100', 'text-slate-900');
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                if (!checkPermission()) {
+                    return;
+                }
+                highlightActiveTab();
+                await initializeGedDocuments();
+                // Define data padrão para "Data de Envio" como hoje
+                const today = new Date().toISOString().split('T')[0];
+                const dateDocSentEl = document.getElementById('dateDocSent');
+                if (dateDocSentEl) {
+                    dateDocSentEl.value = today;
+                }
+                
+                renderTable();
+                updateFinancialKPIs();
+                renderCashFlowTable();
+                
+                // Criar gráficos com tratamento de erros
+                try {
+                    if (document.getElementById('monthlyFlowChart')) {
+                        createMonthlyFlowChart();
+                    }
+                } catch (chartError) {
+                    console.warn('Erro ao criar gráfico de fluxo mensal:', chartError);
+                }
+                
+                try {
+                    if (document.getElementById('departmentChart')) {
+                        createDepartmentChart();
+                    }
+                } catch (chartError) {
+                    console.warn('Erro ao criar gráfico de departamento:', chartError);
+                }
+                
+                try {
+                    updateDepartmentChart();
+                } catch (e) {
+                    console.warn('Erro ao atualizar gráfico de departamento:', e);
+                }
+                
+                try {
+                    updateMonthlyFlowChart();
+                } catch (e) {
+                    console.warn('Erro ao atualizar gráfico mensal:', e);
+                }
+                
+                const params = new URLSearchParams(window.location.search);
+                const t = params.get('tab');
+                setGedTab(t || 'documentos');
+            } catch (error) {
+                console.error('Erro ao inicializar GED:', error);
+                // Mesmo com erro, tenta mostrar algo
+                renderTable();
+                renderCashFlowTable();
+                setGedTab('documentos');
+            }
+        });
+        console.log('DOMContentLoaded listener registrado');
+        console.log('setGedTab exists:', typeof setGedTab);
+        console.log('sidebarNavigate exists:', typeof sidebarNavigate);
+    </script>
+</body>
+</html>
