@@ -2,9 +2,8 @@ const express = require('express');
 const cors    = require('cors');
 const path    = require('path');
 const fs      = require('fs');
-const dotenv  = require('dotenv');
 
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+const config = require('./config');
 
 // ─── Security Middleware ──────────────────────────────────────────────────────
 const {
@@ -12,17 +11,8 @@ const {
   logAudit, createAuditLog
 } = require('./backend/middleware/security');
 
-// ─── Validação de variáveis obrigatórias ──────────────────────────────────────
-const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'JWT_SECRET', 'ALLOWED_ORIGINS'];
-for (const key of REQUIRED_ENV) {
-  if (!process.env[key]) {
-    console.error(`ERRO: variável de ambiente "${key}" não definida. Verifique o .env.`);
-    process.exit(1);
-  }
-}
-
-const BASE_PATH = process.env.BASE_PATH ? `/${process.env.BASE_PATH.replace(/^\/|\/$/g, '')}` : '';
-const API_PATH = `${BASE_PATH}/api`;
+const BASE_PATH = config.BASE_PATH;
+const API_PATH = config.API_PATH;
 
 // ─── Rotas ───────────────────────────────────────────────────────────────────
 const authRoutes    = require('./backend/routes/auth');
@@ -39,7 +29,7 @@ app.use(securityHeaders);
 // ─── #6 CORS restrito ─────────────────────────────────────────────────────────
 // ALLOWED_ORIGINS no .env: origens separadas por vírgula
 // Ex.: ALLOWED_ORIGINS=http://localhost:3000,https://ged.novaroma.com.br
-const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim());
+const allowedOrigins = config.ALLOWED_ORIGINS;
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -137,7 +127,7 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 3000;
+const PORT = config.PORT;
 app.listen(PORT, () => {
   console.log(`Servidor GED iniciado em http://localhost:${PORT}`);
   console.log(`CORS permitido para: ${allowedOrigins.join(', ')}`);

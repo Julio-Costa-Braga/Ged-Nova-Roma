@@ -30,13 +30,15 @@ describe('verifyPassword', () => {
   it('retorna true para senha correta', async () => {
     const hash = await authModule.hashPassword('correta123');
     const ok   = await authModule.verifyPassword('correta123', hash);
-    assert.equal(ok, true);
+    assert.equal(ok.valid, true);
+    assert.equal(ok.needsMigration, false);
   });
 
   it('retorna false para senha errada', async () => {
     const hash = await authModule.hashPassword('correta123');
     const ok   = await authModule.verifyPassword('errada456', hash);
-    assert.equal(ok, false);
+    assert.equal(ok.valid, false);
+    assert.equal(ok.needsMigration, false);
   });
 });
 

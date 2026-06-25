@@ -5,6 +5,7 @@ node_modules/
 # Variáveis de ambiente — NUNCA commitar
 .env
 .env.local
+.env.production
 .env.*.local
 
 # Build / cache
