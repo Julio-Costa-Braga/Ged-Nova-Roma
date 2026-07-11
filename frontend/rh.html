@@ -674,7 +674,7 @@
                         </div>
                         <div class="mt-2 flex items-center justify-between gap-1">
                             <div class="relative">
-                                <button onclick="stopAndToggleUnitDropdown(event, ${collaborator.id})" class="text-[10px] font-semibold px-2 py-1 rounded-lg transition flex items-center gap-1 ${
+                                <button onclick="event.stopPropagation(); toggleUnitDropdown(event, ${collaborator.id})" class="text-[10px] font-semibold px-2 py-1 rounded-lg transition flex items-center gap-1 ${
                                     unidade === 'Caruaru' ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-sky-100 text-sky-700 hover:bg-sky-200'
                                 }">
                                     <i data-lucide="${unidade === 'Caruaru' ? 'map-pin' : 'building'}" class="w-3 h-3"></i>
@@ -682,19 +682,19 @@
                                     <i data-lucide="chevron-down" class="w-3 h-3"></i>
                                 </button>
                                 <div id="unitDropdown_${collaborator.id}" class="hidden absolute left-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg z-20 min-w-[120px] overflow-hidden">
-                                    <button onclick="stopAndSelectUnitFromDropdown(event, ${collaborator.id}, 'Recife')" class="w-full text-left text-xs px-3 py-2 hover:bg-sky-50 hover:text-sky-700 transition flex items-center gap-2 ${unidade === 'Recife' ? 'bg-sky-50 text-sky-700 font-semibold' : 'text-slate-700'}">
+                                    <button onclick="event.stopPropagation(); selectUnitFromDropdown(${collaborator.id}, 'Recife')" class="w-full text-left text-xs px-3 py-2 hover:bg-sky-50 hover:text-sky-700 transition flex items-center gap-2 ${unidade === 'Recife' ? 'bg-sky-50 text-sky-700 font-semibold' : 'text-slate-700'}">
                                         <i data-lucide="building" class="w-3 h-3"></i>
                                         <span>Recife</span>
                                         ${unidade === 'Recife' ? '<i data-lucide="check" class="w-3 h-3 ml-auto text-sky-600"></i>' : ''}
                                     </button>
-                                    <button onclick="stopAndSelectUnitFromDropdown(event, ${collaborator.id}, 'Caruaru')" class="w-full text-left text-xs px-3 py-2 hover:bg-amber-50 hover:text-amber-700 transition flex items-center gap-2 ${unidade === 'Caruaru' ? 'bg-amber-50 text-amber-700 font-semibold' : 'text-slate-700'}">
+                                    <button onclick="event.stopPropagation(); selectUnitFromDropdown(${collaborator.id}, 'Caruaru')" class="w-full text-left text-xs px-3 py-2 hover:bg-amber-50 hover:text-amber-700 transition flex items-center gap-2 ${unidade === 'Caruaru' ? 'bg-amber-50 text-amber-700 font-semibold' : 'text-slate-700'}">
                                         <i data-lucide="map-pin" class="w-3 h-3"></i>
                                         <span>Caruaru</span>
                                         ${unidade === 'Caruaru' ? '<i data-lucide="check" class="w-3 h-3 ml-auto text-amber-600"></i>' : ''}
                                     </button>
                                 </div>
                             </div>
-                            <button onclick="stopAndOpenEditCollaboratorModal(event, ${collaborator.id})" class="text-[10px] font-semibold bg-slate-100 text-slate-600 hover:bg-blue-100 hover:text-blue-700 px-2 py-1 rounded-lg transition flex items-center gap-1">
+                            <button onclick="event.stopPropagation(); openEditCollaboratorModal(${collaborator.id})" class="text-[10px] font-semibold bg-slate-100 text-slate-600 hover:bg-blue-100 hover:text-blue-700 px-2 py-1 rounded-lg transition flex items-center gap-1">
                                 <i data-lucide="pencil" class="w-3 h-3"></i>
                                 <span>Editar</span>
                             </button>
@@ -833,7 +833,7 @@
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
                     <span class="text-xs bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-full font-semibold">${totalAdmFiles} arquivo(s)</span>
-                    <button onclick="stopAndGenerateExternalLink(event, ${collaboratorId})" class="text-xs bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1">
+                    <button onclick="event.stopPropagation(); generateExternalLink(${collaboratorId})" class="text-xs bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1">
                         <i data-lucide="link" class="w-3 h-3"></i>
                         <span>Link Externo</span>
                     </button>
@@ -1555,27 +1555,6 @@
             document.querySelectorAll('[id^="unitDropdown_"]').forEach(el => el.classList.add('hidden'));
         }
 
-        // Helpers to safely stop propagation from inline onclick handlers
-        function stopAndToggleUnitDropdown(e, collabId) {
-            if (e && e.stopPropagation) e.stopPropagation();
-            try { toggleUnitDropdown(e, collabId); } catch (err) { console.warn('toggleUnitDropdown error', err); }
-        }
-
-        function stopAndSelectUnitFromDropdown(e, collabId, unit) {
-            if (e && e.stopPropagation) e.stopPropagation();
-            try { selectUnitFromDropdown(collabId, unit); } catch (err) { console.warn('selectUnitFromDropdown error', err); }
-        }
-
-        function stopAndOpenEditCollaboratorModal(e, collabId) {
-            if (e && e.stopPropagation) e.stopPropagation();
-            try { openEditCollaboratorModal(collabId); } catch (err) { console.warn('openEditCollaboratorModal error', err); }
-        }
-
-        function stopAndGenerateExternalLink(e, collabId) {
-            if (e && e.stopPropagation) e.stopPropagation();
-            try { generateExternalLink(collabId); } catch (err) { console.warn('generateExternalLink error', err); }
-        }
-
         document.addEventListener('click', function() {
             closeAllUnitDropdowns();
         });
@@ -2154,9 +2133,22 @@
             if (!collaborator) return;
             const token = 'ADM-' + collaborator.id.toString().padStart(3, '0') + '-' + Math.random().toString(36).substring(2, 8).toUpperCase();
             const link = `https://portal.novaroma.com.br/admissao/${token}`;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(link).catch(() => {});
+            function copyToClipboard(text) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    return navigator.clipboard.writeText(text).catch(() => {
+                        // fallback
+                        const ta = document.createElement('textarea');
+                        ta.value = text; document.body.appendChild(ta); ta.select();
+                        try { document.execCommand('copy'); } catch (e) { /* ignore */ }
+                        ta.remove();
+                    });
+                }
+                const ta = document.createElement('textarea');
+                ta.value = text; document.body.appendChild(ta); ta.select();
+                try { document.execCommand('copy'); } catch (e) { /* ignore */ }
+                ta.remove();
             }
+            copyToClipboard(link);
             const existing = document.getElementById('externalLinkModal');
             if (existing) existing.remove();
             const overlay = document.createElement('div');
@@ -2178,7 +2170,7 @@
                         <p class="text-sm text-slate-600">Compartilhe este link com o colaborador para que ele próprio faça o upload dos documentos de admissão.</p>
                         <div class="flex items-center gap-2">
                             <input type="text" readonly value="${link}" class="flex-1 border border-slate-300 rounded-xl px-4 py-3 text-sm bg-slate-50 text-slate-900 font-mono select-all focus:outline-none" onclick="this.select()">
-                            <button onclick="navigator.clipboard.writeText('${link}'); showToast('Link copiado!', 'Link externo copiado para a área de transferência.', 'bg-green-700');" class="bg-blue-900 hover:bg-blue-800 text-white px-4 py-3 rounded-xl text-sm font-semibold transition flex items-center gap-1">
+                            <button onclick="(function(){ try{ copyToClipboard('${link}'); showToast('Link copiado!', 'Link externo copiado para a área de transferência.', 'bg-green-700'); }catch(e){console.warn(e);} })()" class="bg-blue-900 hover:bg-blue-800 text-white px-4 py-3 rounded-xl text-sm font-semibold transition flex items-center gap-1">
                                 <i data-lucide="copy" class="w-4 h-4"></i>
                                 <span>Copiar</span>
                             </button>

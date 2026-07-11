@@ -20,6 +20,7 @@ const usersRoutes   = require('./backend/routes/users');
 const rhRoutes      = require('./backend/routes/rh');
 const gedRoutes     = require('./backend/routes/ged');
 const financeRoutes = require('./backend/routes/finance');
+const mailRoutes = require('./backend/routes/mail');
 
 const app = express();
 
@@ -28,13 +29,24 @@ app.use(securityHeaders);
 
 // ─── #6 CORS restrito ─────────────────────────────────────────────────────────
 // ALLOWED_ORIGINS no .env: origens separadas por vírgula
-// Ex.: ALLOWED_ORIGINS=http://localhost:3000,https://ged.novaroma.com.br
+// Ex.: ALLOWED_ORIGINS=http://localhost:3000,https://ged.novaroma.com.br,https://*.vercel.app
 const allowedOrigins = config.ALLOWED_ORIGINS;
+
+function isOriginAllowed(origin) {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  if (allowedOrigins.includes('*')) return true;
+  return allowedOrigins.some(pattern => {
+    if (pattern.endsWith('*')) {
+      return origin.startsWith(pattern.slice(0, -1));
+    }
+    return false;
+  });
+}
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Permite requests sem origin (ex.: curl, Postman, SSR)
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    if (isOriginAllowed(origin)) return callback(null, true);
     callback(new Error(`Origin bloqueada pelo CORS: ${origin}`));
   },
   credentials: true
@@ -75,6 +87,7 @@ app.use(`${API_PATH}/users`,   usersRoutes);
 app.use(`${API_PATH}/rh`,      rhRoutes);
 app.use(`${API_PATH}/ged`,     gedRoutes);
 app.use(`${API_PATH}/finance`, financeRoutes);
+app.use(`${API_PATH}/mail`, mailRoutes);
 
 // 404 explícito para rotas /api/* não encontradas (antes do static)
 app.use(`${API_PATH}`, (req, res) => {

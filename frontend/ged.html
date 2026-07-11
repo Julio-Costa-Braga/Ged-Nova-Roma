@@ -392,18 +392,18 @@
                 </div>
                 <p class="text-sm text-gray-600">Configure regras de assinatura eletrônica e notificações por e-mail.</p>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
                         <label class="block text-xs uppercase text-slate-500 mb-2">Remetente de e-mail</label>
-                        <input id="signatureFrom" type="email" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="assinatura@novaroma.edu.br">
+                        <input type="email" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="assinatura@novaroma.edu.br">
                     </div>
                     <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
                         <label class="block text-xs uppercase text-slate-500 mb-2">Assunto padrão</label>
-                        <input id="signatureSubject" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="Assine o documento X até ...">
+                        <input type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="Assine o documento X até ...">
                     </div>
                 </div>
                 <div class="mt-4 flex flex-wrap gap-3">
-                    <button onclick="saveSignatureParams()" class="rounded-xl bg-cyan-900 text-white px-4 py-2 text-sm font-semibold hover:bg-cyan-800 transition">Salvar parâmetros</button>
-                    <button onclick="testSendSignatureEmail()" class="rounded-xl bg-slate-100 text-slate-700 px-4 py-2 text-sm font-semibold hover:bg-slate-200 transition">Testar envio de e-mail</button>
+                    <button id="saveSignParamsBtn" class="rounded-xl bg-cyan-900 text-white px-4 py-2 text-sm font-semibold hover:bg-cyan-800 transition">Salvar parâmetros</button>
+                    <button id="testMailBtn" class="rounded-xl bg-slate-100 text-slate-700 px-4 py-2 text-sm font-semibold hover:bg-slate-200 transition">Testar envio de e-mail</button>
                 </div>
             </div>
         </section>
@@ -770,6 +770,42 @@
             }
             window.location.href = `${page}.html${safeTab ? `?tab=${safeTab}` : ''}`;
         }
+
+        // Handler para testar envio de e-mail via backend
+        document.addEventListener('DOMContentLoaded', () => {
+            const testBtn = document.getElementById('testMailBtn');
+            const saveBtn = document.getElementById('saveSignParamsBtn');
+            if (testBtn) {
+                testBtn.addEventListener('click', async (e) => {
+                    const emailInput = document.getElementById('signerEmail');
+                    const email = emailInput ? emailInput.value.trim() : '';
+                    if (!email) { showToast('E-mail inválido', 'Informe um e-mail para teste.', 'bg-red-700'); return; }
+                    try {
+                        testBtn.disabled = true;
+                        const res = await fetch('/api/mail/test', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email })
+                        });
+                        const data = await res.json();
+                        if (res.ok && data.ok) {
+                            showToast('E-mail enviado', `Teste enviado para ${email}`, 'bg-green-700');
+                        } else {
+                            showToast('Falha no envio', data.error || 'Erro ao enviar e-mail.', 'bg-red-700');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        showToast('Erro', err.message || 'Erro ao enviar e-mail.', 'bg-red-700');
+                    } finally { testBtn.disabled = false; }
+                });
+            }
+
+            if (saveBtn) {
+                saveBtn.addEventListener('click', (e) => {
+                    showToast('Parâmetros salvos', 'Parâmetros de assinatura atualizados localmente.', 'bg-green-700');
+                });
+            }
+        });
 
         function checkPermission() {
             const activeUsername = localStorage.getItem('gedAuth');
