@@ -418,6 +418,33 @@ async function authenticateUser(event) {
     }
 }
 
+// --- Signature parameters helpers (frontend) ---
+function saveSignatureParams() {
+    const from = document.getElementById('signatureFrom')?.value?.trim() || '';
+    const subject = document.getElementById('signatureSubject')?.value?.trim() || '';
+    localStorage.setItem('gedSignatureFrom', from);
+    localStorage.setItem('gedSignatureSubject', subject);
+    try { showToast('Parâmetros salvos', 'Parâmetros de assinatura salvos localmente.', 'bg-green-700'); } catch (e) { alert('Parâmetros salvos'); }
+}
+
+async function testSendSignatureEmail() {
+    const to = document.getElementById('signatureFrom')?.value?.trim() || '';
+    if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+        try { showToast('E‑mail inválido', 'Informe um remetente válido para testar o envio.', 'bg-red-700'); } catch (e) { alert('E-mail inválido'); }
+        return;
+    }
+
+    // Try calling backend test endpoint if available
+    try {
+        await apiFetch('/utils/test-email', { method: 'POST', body: JSON.stringify({ to }) });
+        try { showToast('E‑mail enviado', `E‑mail de teste enviado para ${to}.`, 'bg-green-700'); } catch (e) { alert('E-mail de teste enviado'); }
+    } catch (err) {
+        console.warn('testSendSignatureEmail failed:', err);
+        const msg = 'Não foi possível enviar o e‑mail. Configure a variável MAIL_API_KEY no servidor ou crie o endpoint /utils/test-email.';
+        try { showToast('Envio falhou', msg, 'bg-red-700'); } catch (e) { alert(msg); }
+    }
+}
+
 /**
  * Allow public (guest) access: create a read-only guest session so pages can load and fetch data
  */
