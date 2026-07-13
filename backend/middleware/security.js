@@ -45,7 +45,7 @@ function securityHeaders(req, res, next) {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   res.setHeader('Content-Security-Policy', 
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: https:; connect-src 'self' https://xaitvyfplvbchygsejjv.supabase.co; frame-ancestors 'none';"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: https:; connect-src 'self' https://xaitvyfplvbchygsejjv.supabase.co https://unpkg.com https://cdn.jsdelivr.net; frame-ancestors 'none';"
   );
   next();
 }

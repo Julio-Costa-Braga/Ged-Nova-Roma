@@ -67,6 +67,10 @@ if (BASE_PATH) {
   });
 }
 
+app.get('/favicon.ico', (req, res) => {
+  res.redirect(`${BASE_PATH}/favicon_io/favicon.ico`);
+});
+
 app.get(`${API_PATH}/health`, (req, res) => {
   res.json({ status: 'ok', service: 'GED Backend', timestamp: new Date().toISOString() });
 });
