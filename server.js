@@ -128,7 +128,12 @@ app.use((err, req, res, next) => {
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 const PORT = config.PORT;
-app.listen(PORT, () => {
-  console.log(`Servidor GED iniciado em http://localhost:${PORT}`);
-  console.log(`CORS permitido para: ${allowedOrigins.join(', ')}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Servidor GED iniciado em http://localhost:${PORT}`);
+    console.log(`CORS permitido para: ${allowedOrigins.join(', ')}`);
+  });
+}
+
+// Export for Vercel serverless
+module.exports = app;
