@@ -1,21 +1,17 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const http = require('http');
 const https = require('https');
 
 const app = express();
 const frontendDir = path.join(__dirname, 'frontend');
 const RENDER_HOST = 'ged-nova-roma-backend.onrender.com';
 
-app.use(express.json());
-
 app.all('/NOVAROMA/api/*', (req, res) => {
-  const apiPath = req.path.replace('/NOVAROMA/api', '/NOVAROMA/api');
   const options = {
     hostname: RENDER_HOST,
     port: 443,
-    path: apiPath + (req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''),
+    path: req.url,
     method: req.method,
     headers: { ...req.headers, host: RENDER_HOST }
   };
@@ -26,7 +22,7 @@ app.all('/NOVAROMA/api/*', (req, res) => {
     Object.keys(proxyRes.headers).forEach(k => res.setHeader(k, proxyRes.headers[k]));
     proxyRes.pipe(res);
   });
-  proxyReq.on('error', () => res.status(502).json({ error: 'Erro ao conectar com o backend.' }));
+  proxyReq.on('error', () => { try { res.status(502).json({ error: 'Erro ao conectar com o backend.' }); } catch (e) {} });
   req.pipe(proxyReq);
 });
 
