@@ -2,21 +2,32 @@
   "version": 2,
   "builds": [
     {
-      "src": "server.js",
-      "use": "@vercel/node"
+      "src": "frontend/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
+      "src": "^/?$",
+      "dest": "/NOVAROMA/",
+      "status": 302
+    },
+    {
+      "src": "/NOVAROMA/api/(.*)",
+      "dest": "https://ged-nova-roma-backend.onrender.com/NOVAROMA/api/$1"
+    },
+    {
+      "src": "/NOVAROMA/(.*)",
+      "dest": "/frontend/$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
-      "dest": "server.js"
+      "dest": "/frontend/index.html"
     }
   ],
-  "env": {
-    "ALLOWED_ORIGINS": "https://gednovaroma.docflow.dev.br",
-    "PORT": "3000",
-    "BASE_PATH": "NOVAROMA"
-  },
   "headers": [
     {
       "source": "/(.*)",
