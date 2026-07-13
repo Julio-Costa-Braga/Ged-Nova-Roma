@@ -2,41 +2,18 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/**",
-      "use": "@vercel/static"
+      "src": "server-vercel.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
-    {
-      "src": "^/?$",
-      "dest": "/NOVAROMA/",
-      "status": 302
-    },
     {
       "src": "/NOVAROMA/api/(.*)",
       "dest": "https://ged-nova-roma-backend.onrender.com/NOVAROMA/api/$1"
     },
     {
-      "src": "/NOVAROMA/(.*)",
-      "dest": "/frontend/$1"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/frontend/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600"
-        }
-      ]
+      "dest": "server-vercel.js"
     }
   ]
 }
