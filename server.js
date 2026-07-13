@@ -1,3 +1,4 @@
+require('express-async-errors');
 const express = require('express');
 const cors    = require('cors');
 const path    = require('path');
@@ -122,8 +123,8 @@ app.use((err, req, res, next) => {
   if (err.message && err.message.startsWith('Origin bloqueada')) {
     return res.status(403).json({ error: err.message });
   }
-  console.error('Internal error:', err);
-  res.status(500).json({ error: 'Erro interno do servidor.' });
+  console.error('Internal error:', err.message, err.stack);
+  res.status(500).json({ error: 'Erro interno do servidor.', details: err.message });
 });
 
 // ─── Start ────────────────────────────────────────────────────────────────────
