@@ -1,29 +1,33 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const https = require('https');
 
 const app = express();
 const frontendDir = path.join(__dirname, 'frontend');
-const RENDER_HOST = 'ged-nova-roma-backend.onrender.com';
+const RENDER_URL = 'https://ged-nova-roma-backend.onrender.com';
 
-app.all('/NOVAROMA/api/*', (req, res) => {
-  const options = {
-    hostname: RENDER_HOST,
-    port: 443,
-    path: req.url,
-    method: req.method,
-    headers: { ...req.headers, host: RENDER_HOST }
-  };
-  delete options.headers['x-forwarded-host'];
-  delete options.headers['x-vercel-id'];
-  const proxyReq = https.request(options, (proxyRes) => {
-    res.status(proxyRes.statusCode);
-    Object.keys(proxyRes.headers).forEach(k => res.setHeader(k, proxyRes.headers[k]));
-    proxyRes.pipe(res);
-  });
-  proxyReq.on('error', () => { try { res.status(502).json({ error: 'Erro ao conectar com o backend.' }); } catch (e) {} });
-  req.pipe(proxyReq);
+app.use('/NOVAROMA/api', express.json());
+
+app.all('/NOVAROMA/api/*', async (req, res) => {
+  try {
+    const url = RENDER_URL + req.url;
+    const headers = { ...req.headers, host: 'ged-nova-roma-backend.onrender.com' };
+    delete headers['x-forwarded-host'];
+    delete headers['x-vercel-id'];
+    delete headers['content-length'];
+    const body = ['GET', 'HEAD'].includes(req.method) ? undefined : JSON.stringify(req.body);
+    const fetchRes = await fetch(url, {
+      method: req.method,
+      headers,
+      body
+    });
+    res.status(fetchRes.status);
+    fetchRes.headers.forEach((v, k) => res.setHeader(k, v));
+    const text = await fetchRes.text();
+    res.send(text);
+  } catch (err) {
+    res.status(502).json({ error: 'Erro ao conectar com o backend.' });
+  }
 });
 
 app.get('/', (req, res) => res.redirect('/NOVAROMA/'));
