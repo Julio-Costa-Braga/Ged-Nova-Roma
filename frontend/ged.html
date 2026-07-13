@@ -392,18 +392,18 @@
                 </div>
                 <p class="text-sm text-gray-600">Configure regras de assinatura eletrônica e notificações por e-mail.</p>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
                         <label class="block text-xs uppercase text-slate-500 mb-2">Remetente de e-mail</label>
-                        <input type="email" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="assinatura@novaroma.edu.br">
+                        <input id="signatureFrom" type="email" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="assinatura@novaroma.edu.br">
                     </div>
                     <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
                         <label class="block text-xs uppercase text-slate-500 mb-2">Assunto padrão</label>
-                        <input type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="Assine o documento X até ...">
+                        <input id="signatureSubject" type="text" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="Assine o documento X até ...">
                     </div>
                 </div>
                 <div class="mt-4 flex flex-wrap gap-3">
-                    <button class="rounded-xl bg-cyan-900 text-white px-4 py-2 text-sm font-semibold hover:bg-cyan-800 transition">Salvar parâmetros</button>
-                    <button class="rounded-xl bg-slate-100 text-slate-700 px-4 py-2 text-sm font-semibold hover:bg-slate-200 transition">Testar envio de e-mail</button>
+                    <button onclick="saveSignatureParams()" class="rounded-xl bg-cyan-900 text-white px-4 py-2 text-sm font-semibold hover:bg-cyan-800 transition">Salvar parâmetros</button>
+                    <button onclick="testSendSignatureEmail()" class="rounded-xl bg-slate-100 text-slate-700 px-4 py-2 text-sm font-semibold hover:bg-slate-200 transition">Testar envio de e-mail</button>
                 </div>
             </div>
         </section>
