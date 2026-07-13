@@ -745,6 +745,10 @@
         function sidebarNavigate(page, tab) {
             const safeTab = tab ? encodeURIComponent(tab) : '';
             
+            // Salva estado para highlight da sidebar
+            localStorage.setItem('sidebarCurrentPage', page);
+            localStorage.setItem('sidebarCurrentTab', tab || '');
+            
             // Fecha sidebar em mobile após clicar
             const sidebar = document.getElementById('sidebar');
             if (sidebar && window.innerWidth <= 768) {

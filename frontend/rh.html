@@ -1701,32 +1701,63 @@
                 cpfInput.value = cpf;
             }
 
-            collaborator.name = name;
-            collaborator.role = document.getElementById('editCollabRole').value.trim();
-            collaborator.active = document.getElementById('editCollabActive').value === 'true';
-
+            const role = document.getElementById('editCollabRole').value.trim();
+            const active = document.getElementById('editCollabActive').value === 'true';
             const admVal = document.getElementById('editCollabAdmission').value;
-            collaborator.admissionDate = admVal ? admVal.split('-').reverse().join('/') : '';
             const disVal = document.getElementById('editCollabDismissal').value;
-            collaborator.dismissalDate = disVal ? disVal.split('-').reverse().join('/') : '';
 
-            const safeName = name.replace(/\//g, '-');
-            collaborator.path = `RH/${safeName}`;
-
+            const employeeData = {};
             EMPLOYEE_TABLE_COLUMNS.forEach(key => {
                 const input = document.getElementById('editField_' + key);
-                if (input) {
-                    collaborator.employeeData[key] = input.value;
-                }
+                employeeData[key] = input ? input.value : '';
             });
 
-            document.getElementById('editCollabModal')?.remove();
-            selectedHRCollaboratorId = collabId;
-            renderHRFolders();
-            renderHRDocuments(collabId);
-            renderEmployeeTable();
-            populateContractRecipientOptions();
-            showToast('Colaborador atualizado', `Dados de ${name} salvos com sucesso.`, 'bg-green-700');
+            const payload = {
+                nome: name,
+                funcao: role || employeeData["Função"] || '',
+                situacao: active ? 'Ativo' : 'Inativo',
+                admissao: admVal || undefined,
+                demissao: disVal || undefined,
+                matricula: employeeData['Matricula'] || undefined,
+                localizacao: employeeData['Locação'] || undefined,
+                unidade: employeeData['Unidade'] || undefined,
+                data_nasc: employeeData['Data Nascimento'] || undefined,
+                remuneracao: Number(employeeData['Remuneração'] || 0) || 0,
+                telefone: employeeData['Telefone'] || undefined,
+                rg: employeeData['RG'] || undefined,
+                cpf: employeeData['CPF'] || undefined,
+                pis: employeeData['PIS-PASEP'] || undefined,
+                sexo: employeeData['Sexo'] || undefined,
+                pai_mae: employeeData['Pai-Mãe'] || undefined,
+                titulacao: employeeData['Titulação'] || undefined,
+                curso: employeeData['Curso'] || undefined,
+                email_pessoal: employeeData['E-mail Pessoal'] || undefined,
+                email_corporativo: employeeData['E-mail Corporativo'] || undefined
+            };
+
+            apiFetch(`/rh/colaboradores/${collabId}`, {
+                method: 'PUT',
+                body: JSON.stringify(payload)
+            }).then(() => {
+                collaborator.name = name;
+                collaborator.role = role;
+                collaborator.active = active;
+                collaborator.admissionDate = admVal ? admVal.split('-').reverse().join('/') : '';
+                collaborator.dismissalDate = disVal ? disVal.split('-').reverse().join('/') : '';
+                collaborator.path = `RH/${name.replace(/\//g, '-')}`;
+                collaborator.employeeData = employeeData;
+
+                document.getElementById('editCollabModal')?.remove();
+                selectedHRCollaboratorId = collabId;
+                renderHRFolders();
+                renderHRDocuments(collabId);
+                renderEmployeeTable();
+                populateContractRecipientOptions();
+                showToast('Colaborador atualizado', `Dados de ${name} salvos com sucesso.`, 'bg-green-700');
+            }).catch(err => {
+                console.error('Erro atualizando colaborador via API:', err);
+                showToast('Erro ao salvar', 'Não foi possível salvar as alterações no servidor.', 'bg-red-700');
+            });
         }
 
         function updateAdmissionDate() {
@@ -2132,7 +2163,8 @@
             const collaborator = hrCollaborators.find(c => c.id === collaboratorId);
             if (!collaborator) return;
             const token = 'ADM-' + collaborator.id.toString().padStart(3, '0') + '-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            const link = `https://portal.novaroma.com.br/admissao/${token}`;
+            const baseUrl = window.location.origin + (window.location.pathname.includes('/NOVAROMA') ? '/NOVAROMA' : '');
+            const link = `${baseUrl}/admissao/${token}`;
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(link).catch(() => {});
             }

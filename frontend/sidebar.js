@@ -32,16 +32,16 @@ async function loadSidebar() {
         // Atualiza informações do usuário na sidebar — carrega `script.js` se necessário
         if (typeof getSession === 'function') {
             try { updateSidebarUserInfo(); } catch (e) { console.warn('updateSidebarUserInfo failed:', e); }
+            try { filterSidebarByModules(); } catch (e) { console.warn('filterSidebarByModules failed:', e); }
             try { restoreSidebarState(); } catch (e) { console.warn('restoreSidebarState failed:', e); }
-            try { if (typeof filterSidebarByModules === 'function') filterSidebarByModules(); } catch (e) { console.warn('filterSidebarByModules failed:', e); }
             try { activateCurrentSidebarSection(); } catch (e) { console.warn('activateCurrentSidebarSection failed:', e); }
         } else {
             const s = document.createElement('script');
             s.src = 'script.js';
             s.onload = function () {
                 try { updateSidebarUserInfo(); } catch (e) { console.warn('updateSidebarUserInfo failed after load:', e); }
+                try { filterSidebarByModules(); } catch (e) { console.warn('filterSidebarByModules failed after load:', e); }
                 try { restoreSidebarState(); } catch (e) { console.warn('restoreSidebarState failed after load:', e); }
-                try { if (typeof filterSidebarByModules === 'function') filterSidebarByModules(); } catch (e) { console.warn('filterSidebarByModules failed after load:', e); }
                 try { activateCurrentSidebarSection(); } catch (e) { console.warn('activateCurrentSidebarSection failed after load:', e); }
             };
             s.onerror = function (err) { console.error('Failed to load script.js for sidebar:', err); };
@@ -185,13 +185,27 @@ function activateCurrentSidebarSection() {
     const pageName = currentPage.replace('.html', '');
     const moduleMap = {
         rh: 'rh',
-        ged: 'ged',
+        ged: 'financeiro',
         gestao: 'gestao',
-        observador: 'ged'
+        observador: 'financeiro'
     };
     const moduleName = moduleMap[pageName] || pageName;
     const category = document.querySelector(`#sidebar .sidebar-category[data-module="${moduleName}"]`);
     if (!category) return;
+
+    const savedTab = localStorage.getItem('sidebarCurrentTab') || '';
+    // Se há uma tab salva, tenta abrir o submenu baseado nela
+    if (savedTab) {
+        const link = category.querySelector(`.sidebar-nav a[data-tab="${savedTab}"]`);
+        if (link) {
+            const submenu = link.closest('.submenu');
+            if (submenu) {
+                submenu.classList.add('open');
+                return;
+            }
+        }
+    }
+
     const submenu = category.querySelector('.submenu');
     if (!submenu || submenu.classList.contains('open')) return;
     submenu.classList.add('open');

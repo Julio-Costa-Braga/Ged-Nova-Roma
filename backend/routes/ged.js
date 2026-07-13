@@ -213,4 +213,43 @@ router.delete('/documentos/:id',
   }
 );
 
+// ─── Envio de e-mail para assinatura ──────────────────────────────────────
+
+const { enviarEmailAssinatura } = require('../services/emailService');
+
+const enviarAssinaturaSchema = z.object({
+  documento_id: z.number().int().positive(),
+  email: z.string().email(),
+  nome_documento: z.string().min(1, 'nome_documento é obrigatório.')
+});
+
+router.post('/enviar-assinatura',
+  requireRole('administrador', 'financeiro'),
+  validate(enviarAssinaturaSchema),
+  async (req, res) => {
+    try {
+      const { documento_id, email, nome_documento } = req.body;
+      const basePath = process.env.BASE_PATH ? `/${process.env.BASE_PATH.replace(/^\/|\/$/g, '')}` : '';
+      const link = `${req.protocol}://${req.get('host')}${basePath}/sign.html?doc=${documento_id}`;
+
+      const result = await enviarEmailAssinatura({
+        destinatario: email,
+        nomeDocumento: nome_documento,
+        linkAssinatura: link
+      });
+
+      logAudit(createAuditLog('send_signature_email', req.user.id, 'documento', {
+        documentoId: documento_id,
+        email,
+        ipAddress: req.ip
+      }));
+
+      return res.json({ success: true, message: 'E-mail de assinatura enviado com sucesso', result });
+    } catch (error) {
+      console.error('Send signature email error:', error.message);
+      return res.status(500).json({ error: 'Erro ao enviar e-mail de assinatura.' });
+    }
+  }
+);
+
 module.exports = router;
