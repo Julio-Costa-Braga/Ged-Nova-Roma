@@ -2,14 +2,30 @@
   "version": 2,
   "builds": [
     {
-      "src": "server-vercel.js",
+      "src": "server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "server-vercel.js"
+      "dest": "server.js"
+    }
+  ],
+  "env": {
+    "ALLOWED_ORIGINS": "https://gednovaroma.docflow.dev.br",
+    "PORT": "3000",
+    "BASE_PATH": "NOVAROMA"
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
     }
   ]
 }
