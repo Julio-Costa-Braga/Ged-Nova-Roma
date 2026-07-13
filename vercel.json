@@ -8,10 +8,6 @@
   ],
   "routes": [
     {
-      "src": "/NOVAROMA/api/(.*)",
-      "dest": "https://ged-nova-roma-backend.onrender.com/NOVAROMA/api/$1"
-    },
-    {
       "src": "/(.*)",
       "dest": "server-vercel.js"
     }
