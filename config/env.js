@@ -32,15 +32,17 @@ const env = {
   MAIL_FROM: process.env.MAIL_FROM || ''
 };
 
+if (!env.ALLOWED_ORIGINS || env.ALLOWED_ORIGINS.length === 0) {
+  env.ALLOWED_ORIGINS = ['*'];
+}
+
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'JWT_SECRET', 'ALLOWED_ORIGINS'];
-const missingVars = REQUIRED_ENV.filter(key => !env[key]);
+const missingVars = REQUIRED_ENV.filter(key => !env[key] || (Array.isArray(env[key]) && env[key].length === 0));
 if (missingVars.length > 0) {
-  console.error(
-    `ERRO: variável(s) de ambiente obrigatória(s) não definidas: ${missingVars.join(', ')}\n` +
-    'Local: Verifique .env.local ou .env.production\n' +
-    'Vercel: Configure via https://vercel.com/[projeto]/settings/environment-variables'
+  console.warn(
+    `AVISO: variável(is) de ambiente não definida(s): ${missingVars.join(', ')}\n` +
+    'O servidor iniciará, mas funcionalidades que dependem delas podem não funcionar.'
   );
-  process.exit(1);
 }
 
 module.exports = env;
